@@ -325,6 +325,12 @@ void CTestContoursDlg::OnBnClickedButton4() //  finding displacement by Distance
 void CTestContoursDlg::OnBnClickedCheck1()
 {
 	disp = !disp;
+
+	if (!disp)
+	{
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+	}
 }
 
 
@@ -1539,6 +1545,10 @@ void CTestContoursDlg::OnBnClickedButton7()  // Building real contour + finding 
 	wcy = r51 + wh / 2;
 	wcx = c51 + ww / 2;
 	//hWindow.MoveRectangle();
+
+	if (hWindow.IsHandleValid())
+		hWindow.CloseWindow();
+
 	hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
 	hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
 	hWindow.DispImage(m_ho_Im);
@@ -1565,10 +1575,10 @@ void CTestContoursDlg::OnBnClickedButton7()  // Building real contour + finding 
 		hWindow.DispObj(CircleDu);
 	}
 	// Keep the window open until a key is pressed
-	hWindow.Click();
+	//hWindow.Click();
 
 	// Close the window
-	hWindow.CloseWindow();
+	//hWindow.CloseWindow();
 }
 
 
@@ -1821,6 +1831,10 @@ void CTestContoursDlg::OnBnClickedButton9() // Meander Insp.cyc.func.(single mea
 		wcy = r51 + wh / 2;
 		wcx = c51 + ww / 2;
 		//hWindow.MoveRectangle();
+
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+
 		hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
 		hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
 		hWindow.DispImage(m_ho_Im);
@@ -1858,10 +1872,10 @@ void CTestContoursDlg::OnBnClickedButton9() // Meander Insp.cyc.func.(single mea
 		// Keep the window open until a key is pressed
 		//WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
 		WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
-		hWindow.Click();
+		//hWindow.Click();
 
 		// Close the window
-		hWindow.CloseWindow();
+		//hWindow.CloseWindow();
 	}
 }
 
@@ -2116,6 +2130,9 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 	WriteObject(ho_MeanderDefects, "C:\\Temp1\\ho_MeanderDefects.hobj");
 	if (disp)
 	{
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+
 		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
@@ -2194,12 +2211,12 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 	{
 		if (hWindow.IsHandleValid())
 		{
-			hWindow.DispText("Closing the window", "window", "center", "center", "blue", "shadow", "true");
-			hWindow.Click();
+			//hWindow.DispText("Closing the window", "window", "center", "center", "blue", "shadow", "true");
+			//hWindow.Click();
 			hWindow.CloseWindow();
 			//return;
 		}
-		else
+		//else
 		{
 			int save = 0;
 			//hWindow.InvalidateHandle();
@@ -2267,10 +2284,10 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 			// Keep the window open until a key is pressed
 			//WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
 			WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
-			hWindow.Click();
+			//hWindow.Click();
 
 			// Close the window
-			hWindow.CloseWindow();
+			//hWindow.CloseWindow();
 		}
 		
 	}
@@ -2314,12 +2331,12 @@ void CTestContoursDlg::OnBnClickedButton12() //Connected pad single cycle
 	{
 		if (hWindow.IsHandleValid())
 		{
-			hWindow.DispText("Closing the window", "window", "center", "center", "blue", "shadow", "true");
-			hWindow.Click();
+			//hWindow.DispText("Closing the window", "window", "center", "center", "blue", "shadow", "true");
+			//hWindow.Click();
 			hWindow.CloseWindow();
 			//return;
 		}
-		else
+		//else
 		{
 			int save = 0;
 			//hWindow.InvalidateHandle();
@@ -2341,6 +2358,10 @@ void CTestContoursDlg::OnBnClickedButton12() //Connected pad single cycle
 			wcy = r51 + wh / 2;
 			wcx = c51 + ww / 2;
 			//hWindow.MoveRectangle();
+
+			if (hWindow.IsHandleValid())
+				hWindow.CloseWindow();
+
 			hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
 			hWindow.SetPart((Hlong)r51-10, (Hlong)c51-10, (Hlong)r52+10, (Hlong)c52+10);
 			hWindow.DispImage(m_ho_Im);
@@ -2382,10 +2403,10 @@ void CTestContoursDlg::OnBnClickedButton12() //Connected pad single cycle
 			// Keep the window open until a key is pressed
 			//WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
 			WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
-			hWindow.Click();
+			//hWindow.Click();
 
 			// Close the window
-			hWindow.CloseWindow();
+			//hWindow.CloseWindow();
 		}
 
 	}
@@ -2455,6 +2476,9 @@ void CTestContoursDlg::OnBnClickedButton13() // Pads isol. cycle
 	WriteObject(ho_PadIDefects, "C:\\Temp1\\ho_ho_PadIDefects.hobj");
 	if (disp)
 	{
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+
 		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
@@ -2475,10 +2499,10 @@ void CTestContoursDlg::OnBnClickedButton13() // Pads isol. cycle
 		}
 		else
 			hWindow.DispText("No defected isolated pads found" + (DefPInum), "window", "center", "center", "forest green", "shadow", "true");
-		hWindow.Click();
+		//hWindow.Click();
 
 		// Close the window
-		hWindow.CloseWindow();
+		//hWindow.CloseWindow();
 	}
 }
 
@@ -2539,6 +2563,9 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 	WriteObject(ho_PadCDefects, "C:\\Temp1\\ho_ho_PadCDefects.hobj");
 	if (disp)
 	{
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+
 		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
@@ -2563,9 +2590,9 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 		}
 		else
 			hWindow.DispText("No defected connected pads found" + (DefPCnum), "window", "center", "center", "forest green", "shadow", "true");
-		hWindow.Click();
+		//hWindow.Click();
 
 		// Close the window
-		hWindow.CloseWindow();
+		//hWindow.CloseWindow();
 	}
 }
