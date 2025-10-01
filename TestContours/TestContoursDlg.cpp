@@ -2145,10 +2145,10 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 		}
 		else
 			hWindow.DispText("No defected meanders found" + (DefMnum), "window", "center", "center", "forest green", "shadow", "true");
-		hWindow.Click();
+//		hWindow.Click();
 
 		// Close the window
-		hWindow.CloseWindow();
+//		hWindow.CloseWindow();
 	}
 	
 
