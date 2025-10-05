@@ -46,7 +46,7 @@ namespace Functions
 
 	void ReverseContourH(HObject ho_ContourIn, HObject *ho_ContourOut);
 
-	void BuildBorderContour(HObject ho_Bordersi, HObject *ho_Bordercl);
-	void BuildRealContour(HObject ho_Im, HObject ho_Rectangle5, HObject *ho_ContourOut,
+	void BuildBorderContour(HObject ho_Bordersi, HObject *ho_Bordercl, HObject *ho_BorderEPs);
+	void BuildRealContour(HObject ho_Im, HObject ho_Rectangle5, HObject *ho_ContourOut, HObject *ho_BorderEPs,
 		HObject *ho_RegionIR, HTuple hv_ctype, HTuple hv_thr);
 }

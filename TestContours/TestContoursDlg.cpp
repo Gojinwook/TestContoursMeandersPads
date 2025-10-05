@@ -14,6 +14,8 @@
 
 #include "Functions.h"
 
+#define WINST 1930
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -101,6 +103,9 @@ BEGIN_MESSAGE_MAP(CTestContoursDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT7, &CTestContoursDlg::OnEnChangeEdit7)
 	ON_BN_CLICKED(IDC_BUTTON13, &CTestContoursDlg::OnBnClickedButton13)
 	ON_BN_CLICKED(IDC_BUTTON14, &CTestContoursDlg::OnBnClickedButton14)
+	ON_BN_CLICKED(IDC_BUTTON15, &CTestContoursDlg::OnBnClickedButton15)
+	ON_BN_CLICKED(IDC_BUTTON16, &CTestContoursDlg::OnBnClickedButton16)
+	ON_EN_CHANGE(IDC_EDIT11, &CTestContoursDlg::OnEnChangeEdit11)
 END_MESSAGE_MAP()
 
 
@@ -162,7 +167,7 @@ BOOL CTestContoursDlg::OnInitDialog()
 	m_hv_meander = 162;
 	m_hv_pad = 324;
 	m_hv_padc = 26;
-	m_hw_absmb = 0.7; m_hw_abssp = 0.7; // abs. defects
+	m_hw_absmb = 0.9; m_hw_abssp = 0.9; // abs. defects
 	num = 1;
 	disp = 0;
 
@@ -336,7 +341,7 @@ void CTestContoursDlg::OnBnClickedCheck1()
 
 void CTestContoursDlg::OnBnClickedButton6() // Building real contour 
 {
-	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr;
+	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr, ho_BorderEPs;
 	HTuple hv_ctype, hv_thr;
 	HTuple ht1, ht2, ht;
 
@@ -349,7 +354,7 @@ void CTestContoursDlg::OnBnClickedButton6() // Building real contour
 	ReduceDomain(m_ho_Im, ho_Rectangle5, &ho_Imr);
 	for (int i = 0; i < num; i++)
 	{
-		BuildRealContour(ho_Imr, ho_Rectangle5, &ho_ContourOut,
+		BuildRealContour(ho_Imr, ho_Rectangle5, &ho_ContourOut, &ho_BorderEPs,
 			&ho_RegionIR, m_hv_ctype, hv_thr);
 	}
 	CountSeconds(&ht2);
@@ -827,7 +832,7 @@ void ProcessMeander(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderRe
 	HTuple *hv_Dout) // Filtered displacement
 {
 	
-	HObject ho_CG, ho_Imr, ho_Imc, ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_ContourGm;
+	HObject ho_CG, ho_Imr, ho_Imc, ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_ContourGm, ho_BorderEPs;
 	HTuple hv_RowI, hv_ColI, hv_RowG, hv_ColG, hv_ai, hv_rowIc, hv_colIc, hv_poI, hv_ag, hv_rowGc, hv_colGc, hv_poG, hv_mr, hv_mc, Sign, Displacement,
 		Isinside, hv_DFilt;// , hv_Dout;
 	CountSeconds(&ht1);
@@ -840,8 +845,10 @@ void ProcessMeander(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderRe
 	CropDomain(ho_Imr, &ho_Imc);
 
 	BuildRealContour(ho_Imr, ho_Rectangle5, //  building I contour
-		&ho_ContourOut, &ho_RegionIR,
+		&ho_ContourOut, &ho_BorderEPs, &ho_RegionIR,
 		hv_ctype, hv_thr);
+	HTuple ha, hr, hc;
+	AreaCenter(ho_BorderEPs, &ha, &hr, &hc);
 	CountSeconds(&ht2);
 	GetContourXld(ho_ContourOut, &hv_RowI, &hv_ColI);
 	GetContourXld(ho_CG, &hv_RowG, &hv_ColG);
@@ -989,6 +996,7 @@ void ProcessMeander(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderRe
 		WriteObject(ho_Imr, "C:\\Temp1\\ho_Imr");
 		WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5");
 
+		WriteObject(ho_BorderEPs, "C:\\Temp1\\ho_BorderEPs");
 	}
 
 
@@ -1010,6 +1018,11 @@ void ProcessMeander(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderRe
 		TupleGenConst(nD, 2.5, &Rd);
 		GenCircle(&CircleD, RowD, ColD, Rd);
 		Union1(CircleD, &CircleDu);
+		HObject RInt;
+		Intersection(CircleDu, ho_BorderEPs, &RInt);
+		AreaCenter(RInt, &ha, &hr, &hc);
+		if(ha>0)
+			GenEmptyObj(&CircleDu);
 	}
 	else
 		GenEmptyObj(&CircleDu);
@@ -1182,7 +1195,7 @@ void ProcessMeanderC(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderR
 	HTuple *hv_Dout) // Filtered displacement
 {
 
-	HObject ho_CG, ho_Imr, ho_Imc, ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_ContourGm;
+	HObject ho_CG, ho_Imr, ho_Imc, ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_ContourGm, ho_BorderEPs;
 	HTuple hv_RowI, hv_ColI, hv_RowG, hv_ColG, hv_ai, hv_rowIc, hv_colIc, hv_poI, hv_ag, hv_rowGc, hv_colGc, hv_poG, hv_mr, hv_mc, Sign, Displacement,
 		Isinside, hv_DFilt;// , hv_Dout;
 	CountSeconds(&ht1);
@@ -1195,7 +1208,7 @@ void ProcessMeanderC(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderR
 	CropDomain(ho_Imr, &ho_Imc);
 
 	BuildRealContour(ho_Imr, ho_Rectangle5, //  building I contour
-		&ho_ContourOut, &ho_RegionIR,
+		&ho_ContourOut, &ho_BorderEPs, &ho_RegionIR,
 		hv_ctype, hv_thr);
 	CountSeconds(&ht2);
 	GetContourXld(ho_ContourOut, &hv_RowI, &hv_ColI);
@@ -1390,7 +1403,7 @@ void ProcessMeanderC(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderR
 
 void CTestContoursDlg::OnBnClickedButton7()  // Building real contour + finding displacement
 {
-	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr, ho_Imc, ho_ContourGrsm, ho_MeanderRect, ho_ContourGm;
+	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr, ho_Imc, ho_ContourGrsm, ho_MeanderRect, ho_ContourGm, ho_BorderEPs;
 	HTuple hv_ctype, hv_thr, hv_mr, hv_mc, hv_rowIc, hv_colIc, hv_poI, hv_ai, hv_rowGc, hv_colGc, hv_poG, hv_ag;
 	HTuple ht1, ht3, ht2, ht, Isinside, Sign, Displacement, hv_DFilt, hv_Dout;
 	HTuple r51, c51, r52, c52, ww, wh, wcx, wcy;
@@ -1417,7 +1430,7 @@ void CTestContoursDlg::OnBnClickedButton7()  // Building real contour + finding 
 	CropDomain(ho_Imr, &ho_Imc);
 
 	BuildRealContour(ho_Imr, ho_Rectangle5, //  building I contour
-		&ho_ContourOut, &ho_RegionIR, 
+		&ho_ContourOut, &ho_BorderEPs, &ho_RegionIR,
 		m_hv_ctype, hv_thr);
 
 	GetContourXld(ho_ContourOut, &m_hv_RowI, &m_hv_ColI);
@@ -1613,6 +1626,13 @@ void CTestContoursDlg::OnBnClickedButton5()
 	cstr.Format(_T("(%d)"), (int)tnum);
 	SetDlgItemText(IDC_EDIT9, cstr);
 	printf("\n***ContoursGrsmPc.hobj and RectanglesPadsCon.hobj read***");
+
+	ReadObject(&m_ho_ContoursWireAngles, "C:\\Temp1\\ContoursWireAngles.hobj");
+	ReadObject(&m_ho_RectanglesWireAngles, "C:\\Temp1\\RectanglesWireAngles.hobj");
+	CountObj(m_ho_RectanglesWireAngles, &tnum);
+	cstr.Format(_T("(%d)"), (int)tnum);
+	SetDlgItemText(IDC_EDIT12, cstr);
+	printf("\n***ContoursWireAngles.hobj and RectanglesWireAngles.hobj read***");
 }
 
 
@@ -1835,7 +1855,7 @@ void CTestContoursDlg::OnBnClickedButton9() // Meander Insp.cyc.func.(single mea
 		if (hWindow.IsHandleValid())
 			hWindow.CloseWindow();
 
-		hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
+		hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
 		hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
 		hWindow.DispImage(m_ho_Im);
 		HTuple hv_a, r, c;
@@ -1881,7 +1901,7 @@ void CTestContoursDlg::OnBnClickedButton9() // Meander Insp.cyc.func.(single mea
 
 void CTestContoursDlg::OnBnClickedButton8()
 {
-	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr, ho_Imc, ho_ContourGrsm, ho_MeanderRect, ho_ContourGm, ho_Defects;
+	HObject ho_Rectangle5, ho_ContourOut, ho_RegionIR, ho_Imr, ho_Imc, ho_ContourGrsm, ho_MeanderRect, ho_ContourGm, ho_Defects, ho_BorderEPs;
 	HTuple hv_ctype, hv_thr, hv_mr, hv_mc, hv_rowIc, hv_colIc, hv_poI, hv_ai, hv_rowGc, hv_colGc, hv_poG, hv_ag;
 	HTuple ht1, ht3, ht2, ht, Isinside, Sign, Displacement, hv_DFilt, hv_Dout, hv_nObj, hv_i;
 	HTuple r51, c51, r52, c52, ww, wh, wcx, wcy;
@@ -1909,7 +1929,7 @@ void CTestContoursDlg::OnBnClickedButton8()
 		ReduceDomain(m_ho_Im, ho_Rectangle5, &ho_Imr);
 		//CropDomain(ho_Imr, &ho_Imc);
 
-		BuildRealContour(ho_Imr, ho_Rectangle5, &ho_ContourOut,
+		BuildRealContour(ho_Imr, ho_Rectangle5, &ho_ContourOut, &ho_BorderEPs,
 			&ho_RegionIR, m_hv_ctype, hv_thr);
 		//WriteObject(ho_ContourOut, "C:\\Temp1\\ho_ContourOut.hobj");
 		//WriteObject(m_ho_CG, "C:\\Temp1\\m_ho_CG.hobj");
@@ -2086,13 +2106,18 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 	HObject ho_MeanderDefect, ho_MeanderDefects, ho_Rect;
 	HTuple hv_DOut, hv_nObj;
 	HTuple ht1, ht3, ht2, ht;
+	HTuple Ad, Rd, Cd, ti, pn;
 
+	CountObj(m_ho_ContoursGrsm, &hv_nObj);
+	int nObj = hv_nObj.I();
+	HTuple Padnum;
+	Padnum.Clear();
 	
 
 	CountObj(m_ho_ContoursGrsm, &hv_nObj);
 	GenEmptyObj(&ho_MeanderDefects);
 	CountSeconds(&ht1);
-	int nObj = hv_nObj.I();
+//	int nObj = hv_nObj.I();
 
 	CountSeconds(&ht1);
 	for (int i = 1; i <= nObj; i++)
@@ -2103,6 +2128,9 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 			m_hv_thr, m_hv_meander, m_hw_absmb, m_hw_abssp, m_hv_ctype, m_fsz,
 			&hv_DOut);
 		ConcatObj(ho_MeanderDefects, ho_MeanderDefect, &ho_MeanderDefects);
+		AreaCenter(ho_MeanderDefect, &Ad, &Rd, &Cd);
+		if (Ad > 0)
+			TupleConcat(Padnum, (HTuple)i, &Padnum);
 	}
 	CountSeconds(&ht3);
 	ht = ht3 - ht1;
@@ -2133,7 +2161,7 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 		if (hWindow.IsHandleValid())
 			hWindow.CloseWindow();
 
-		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
+		hWindow.OpenWindow(0, WINST, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
 		hWindow.SetColor("red");
@@ -2142,6 +2170,13 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 		{
 			hWindow.DispObj(ho_MeanderDefects);
 			hWindow.DispText("Defected meanders " + (DefMnum), "window", "center", "center", "red", "shadow", "true");
+			for (ti = 1; ti <= DefMnum; ti = ti + 1)
+			{
+				SelectObj(ho_MeanderDefects, &ho_MeanderDefect, ti);
+				AreaCenter(ho_MeanderDefect, &Ad, &Rd, &Cd);
+				pn = HTuple(Padnum[ti - 1]);
+				hWindow.DispText((pn), "image", Rd, Cd, "red", "shadow", "false");
+			}
 		}
 		else
 			hWindow.DispText("No defected meanders found" + (DefMnum), "window", "center", "center", "forest green", "shadow", "true");
@@ -2238,7 +2273,7 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 			wcy = r51 + wh / 2;
 			wcx = c51 + ww / 2;
 			//hWindow.MoveRectangle();
-			hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
+			hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
 			hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
 			hWindow.DispImage(m_ho_Im);
 			hWindow.SetColor("blue");
@@ -2362,7 +2397,7 @@ void CTestContoursDlg::OnBnClickedButton12() //Connected pad single cycle
 			if (hWindow.IsHandleValid())
 				hWindow.CloseWindow();
 
-			hWindow.OpenWindow(0, 3835, ww, wh, 0, "visible", "");
+			hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
 			hWindow.SetPart((Hlong)r51-10, (Hlong)c51-10, (Hlong)r52+10, (Hlong)c52+10);
 			hWindow.DispImage(m_ho_Im);
 			HTuple hv_a, r, c;
@@ -2410,6 +2445,11 @@ void CTestContoursDlg::OnBnClickedButton12() //Connected pad single cycle
 		}
 
 	}
+	/*if (save)
+	{
+		WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
+		WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
+	}*/
 }
 
 
@@ -2479,7 +2519,7 @@ void CTestContoursDlg::OnBnClickedButton13() // Pads isol. cycle
 		if (hWindow.IsHandleValid())
 			hWindow.CloseWindow();
 
-		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
+		hWindow.OpenWindow(0, WINST, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
 		hWindow.SetColor("red");
@@ -2566,7 +2606,7 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 		if (hWindow.IsHandleValid())
 			hWindow.CloseWindow();
 
-		hWindow.OpenWindow(0, 3835, W, H, 0, "visible", "");
+		hWindow.OpenWindow(0, WINST, W, H, 0, "visible", "");
 		hWindow.DispImage(m_ho_Im);
 		hWindow.SetDraw("margin");
 		hWindow.SetColor("red");
@@ -2595,4 +2635,24 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 		// Close the window
 		//hWindow.CloseWindow();
 	}
+}
+
+
+void CTestContoursDlg::OnBnClickedButton15()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CTestContoursDlg::OnBnClickedButton16()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit11()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT11, cstr);
+	m_hv_wa = _tstof(cstr);
 }

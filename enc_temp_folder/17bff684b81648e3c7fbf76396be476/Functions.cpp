@@ -1080,7 +1080,7 @@ namespace Functions
 		{
 			ho_Borders = ho_Bordersi;
 		}
-		//WriteObject(ho_Borders, "C:\\Temp1\\ho_Borders");
+		WriteObject(ho_Borders, "C:\\Temp1\\ho_Borders");
 		UnionAdjacentContoursXld(ho_Borders, &ho_Border, 35, 35, "attr_forget");
 		CountObj(ho_Borders, &hnB);
 		hv_RowB.Clear();

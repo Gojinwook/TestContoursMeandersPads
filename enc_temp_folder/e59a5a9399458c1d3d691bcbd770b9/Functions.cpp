@@ -1080,7 +1080,7 @@ namespace Functions
 		{
 			ho_Borders = ho_Bordersi;
 		}
-		//WriteObject(ho_Borders, "C:\\Temp1\\ho_Borders");
+		WriteObject(ho_Borders, "C:\\Temp1\\ho_Borders");
 		UnionAdjacentContoursXld(ho_Borders, &ho_Border, 35, 35, "attr_forget");
 		CountObj(ho_Borders, &hnB);
 		hv_RowB.Clear();
@@ -1089,7 +1089,7 @@ namespace Functions
 		{
 			SelectObj(ho_Borders, &HB, hi);
 			GetContourXld(HB, &hRB, &hCB);
-			TupleLength(hRB, &hl);
+			TupleLength(hv_RowB, &hl);
 			TupleConcat(hv_RowB, hRB[0], &hv_RowB);
 			TupleConcat(hv_ColB, hCB[0], &hv_ColB);
 			TupleConcat(hv_RowB, hRB[hl-1], &hv_RowB);
