@@ -106,6 +106,12 @@ BEGIN_MESSAGE_MAP(CTestContoursDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON15, &CTestContoursDlg::OnBnClickedButton15)
 	ON_BN_CLICKED(IDC_BUTTON16, &CTestContoursDlg::OnBnClickedButton16)
 	ON_EN_CHANGE(IDC_EDIT11, &CTestContoursDlg::OnEnChangeEdit11)
+	ON_EN_CHANGE(IDC_EDIT14, &CTestContoursDlg::OnEnChangeEdit14)
+	ON_EN_CHANGE(IDC_EDIT15, &CTestContoursDlg::OnEnChangeEdit15)
+	ON_EN_CHANGE(IDC_EDIT16, &CTestContoursDlg::OnEnChangeEdit16)
+	ON_EN_CHANGE(IDC_EDIT13, &CTestContoursDlg::OnEnChangeEdit13)
+	ON_EN_CHANGE(IDC_EDIT17, &CTestContoursDlg::OnEnChangeEdit17)
+	ON_EN_CHANGE(IDC_EDIT18, &CTestContoursDlg::OnEnChangeEdit18)
 END_MESSAGE_MAP()
 
 
@@ -164,10 +170,15 @@ BOOL CTestContoursDlg::OnInitDialog()
 	pmedo = (float *)malloc(200000 * sizeof(float));
 	m_hv_thr = 150;
 	m_fsz = 21;
+	m_fszwa = 15;
+	m_fszpad = 15;
 	m_hv_meander = 162;
 	m_hv_pad = 324;
 	m_hv_padc = 26;
-	m_hw_absmb = 0.9; m_hw_abssp = 0.9; // abs. defects
+	m_hw_absmb = 0.9; m_hw_abssp = 0.9; // abs. defects for meander
+	m_hw_absmbwa = 0.7; m_hw_absspwa = 0.7; // abs. defects for meander
+	m_hv_wa = 100;
+	m_hw_absmbpad = 0.7; m_hw_abssppad = 0.7; // abs. defects for meander
 	num = 1;
 	disp = 0;
 
@@ -187,6 +198,22 @@ BOOL CTestContoursDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT6, cstr);
 	cstr.Format(_T("%d"), (int)m_hv_padc);
 	SetDlgItemText(IDC_EDIT7, cstr);
+	cstr.Format(_T("%d"), (int)m_hv_wa);
+	SetDlgItemText(IDC_EDIT11, cstr);
+
+	cstr.Format(_T("%.1f"), m_hw_absmbpad.D());
+	SetDlgItemText(IDC_EDIT14, cstr);
+	cstr.Format(_T("%.1f"), m_hw_abssppad.D());
+	SetDlgItemText(IDC_EDIT15, cstr);
+	cstr.Format(_T("%d"), m_fszpad);
+	SetDlgItemText(IDC_EDIT13, cstr);
+
+	cstr.Format(_T("%.1f"), m_hw_absmbwa.D());
+	SetDlgItemText(IDC_EDIT17, cstr);
+	cstr.Format(_T("%.1f"), m_hw_absspwa.D());
+	SetDlgItemText(IDC_EDIT18, cstr);
+	cstr.Format(_T("%d"), m_fszwa);
+	SetDlgItemText(IDC_EDIT16, cstr);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -992,6 +1019,7 @@ void ProcessMeander(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_MeanderRe
 		WriteTuple(hv_D, "C:\\Temp1\\hv_D.tup");
 		WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
 		WriteTuple((*hv_Dout), "C:\\Temp1\\hv_Dout.tup");
+		WriteTuple((hv_Wch), "C:\\Temp1\\hv_Wch.tup");
 
 		WriteObject(ho_Imr, "C:\\Temp1\\ho_Imr");
 		WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5");
@@ -1600,7 +1628,7 @@ void CTestContoursDlg::OnBnClickedButton5()
 	//OnBnClickedButton1();
 	ReadObject(&m_ho_CI, "C:\\Temp1\\CI.hobj");
 	ReadObject(&m_ho_CG, "C:\\Temp1\\CG.hobj");
-	ReadImage(&m_ho_Im, "C:\\Temp1\\Im.tif");
+	ReadImage(&m_ho_Im, "C:\\Temp1\\Im2.tif");
 	ReadObject(&m_ho_Gi, "C:\\Temp1\\Gi.hobj");
 	printf("***Files Open***");
 
@@ -2175,7 +2203,7 @@ void CTestContoursDlg::OnBnClickedButton10()  //Meander Insp.cyc.func.(all meand
 				SelectObj(ho_MeanderDefects, &ho_MeanderDefect, ti);
 				AreaCenter(ho_MeanderDefect, &Ad, &Rd, &Cd);
 				pn = HTuple(Padnum[ti - 1]);
-				hWindow.DispText((pn), "image", Rd, Cd, "red", "shadow", "false");
+				hWindow.DispText((pn), "image", Rd, Cd, "red", "box", "false");
 			}
 		}
 		else
@@ -2221,7 +2249,7 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 	for (int i = 0; i < num; i++)
 		ProcessMeander(m_ho_Im, m_ho_ContoursGrsmPi, m_ho_RectanglesPadsIsol, m_ho_Gi,
 			&ho_PadDefect, &ho_Rect, &m_ho_CG, &m_ho_CI,
-			m_hv_thr, m_hv_pad, m_hw_absmb, m_hw_abssp, m_hv_ctype, m_fsz,
+			m_hv_thr, m_hv_pad, m_hw_absmbpad, m_hw_abssppad, m_hv_ctype, m_fszpad,
 			&hv_DOut);
 	//m_ho_CI=
 	CountSeconds(&lht3);
@@ -2483,7 +2511,7 @@ void CTestContoursDlg::OnBnClickedButton13() // Pads isol. cycle
 		m_hv_meander = (HTuple)i;
 		ProcessMeander(m_ho_Im, m_ho_ContoursGrsmPi, m_ho_RectanglesPadsIsol, m_ho_Gi,
 			&ho_PadIDefect, &ho_Rect, &m_ho_CG, &m_ho_CI,
-			m_hv_thr, m_hv_meander, m_hw_absmb, m_hw_abssp, m_hv_ctype, m_fsz,
+			m_hv_thr, m_hv_meander, m_hw_absmbpad, m_hw_abssppad, m_hv_ctype, m_fszpad,
 			&hv_DOut);
 		ConcatObj(ho_PadIDefects, ho_PadIDefect, &ho_PadIDefects);
 		AreaCenter(ho_PadIDefect, &Ad, &Rd, &Cd);
@@ -2534,7 +2562,7 @@ void CTestContoursDlg::OnBnClickedButton13() // Pads isol. cycle
 				SelectObj(ho_PadIDefects, &ho_PadIDefect, ti);
 				AreaCenter(ho_PadIDefect, &Ad, &Rd, &Cd);
 				pn = HTuple(Padnum[ti - 1]);
-				hWindow.DispText((pn), "image", Rd, Cd, "red", "shadow", "false");
+				hWindow.DispText((pn), "image", Rd, Cd, "red", "box", "false");
 			}
 		}
 		else
@@ -2621,7 +2649,7 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 				SelectObj(ho_PadCDefects, &ho_PadCDefect, ti);
 				AreaCenter(ho_PadCDefect, &Ad, &Rd, &Cd);
 				pn = HTuple(Padnum[ti-1]);
-				hWindow.DispText((pn), "image", Rd, Cd, "red", "shadow", "false");
+				hWindow.DispText((pn), "image", Rd, Cd, "red", "box", "false");
 			}
 			hWindow.SetLineWidth(2);
 			hWindow.SetColor("coral");
@@ -2640,13 +2668,194 @@ void CTestContoursDlg::OnBnClickedButton14() /// Pads con. full cycle
 
 void CTestContoursDlg::OnBnClickedButton15()
 {
-	// TODO: Add your control notification handler code here
+	HObject ho_WADefect, ho_Rect;
+	HTuple hv_DOut;
+	HTuple lht1, lht3, lht2, lht;
+	//m_hv_wa = 720;
+	SelectObj(m_ho_RectanglesWireAngles, &m_ho_Rectangle5, m_hv_wa);
+	SelectObj(m_ho_ContoursWireAngles, &m_ho_CG, m_hv_wa);
+	CountSeconds(&lht1);
+	for (int i = 0; i < num; i++)
+		ProcessMeander(m_ho_Im, m_ho_ContoursWireAngles, m_ho_RectanglesWireAngles, m_ho_Gi,
+			&ho_WADefect, &ho_Rect, &m_ho_CG, &m_ho_CI,
+			m_hv_thr, m_hv_wa, m_hw_absmbwa, m_hw_absspwa, m_hv_ctype, m_fszwa,
+			&hv_DOut);
+
+	CountSeconds(&lht3);
+	lht = lht3 - lht1;
+	double msec1 = lht.D()*1000.;
+
+	printf("\n***Angled wire single cycle ended (%d)-->%.2f msec***", num, msec1);
+
+	lht1 = ht2 - ht1;
+	msec1 = lht1.D()*1000.;
+	lht1 = ht3 - ht2;
+	double msec2 = lht1.D()*1000.;
+	lht1 = ht4 - ht3;
+	double msec3 = lht1.D()*1000.;
+	lht1 = ht5 - ht4;
+	double msec4 = lht1.D()*1000.;
+	lht1 = ht6 - ht5;
+	double msec5 = lht1.D()*1000.;
+	printf("\n***Angled wire single cycle ended (%d)-->%.2f + %.2f + (IsInside)%.2f + %.2f + %.2f  msec***", num, msec1, msec2, msec3, msec4, msec5);
+	if (disp)
+	{
+		if (hWindow.IsHandleValid())
+		{
+
+			hWindow.CloseWindow();
+
+		}
+		//else
+		{
+			int save = 0;
+
+
+			HTuple r51, c51, r52, c52, ww, wh, wcx, wcy;
+
+			SmallestRectangle1(ho_Rect, &r51, &c51, &r52, &c52);
+			ww = (c52 - c51);
+			wh = (r52 - r51);
+			HTuple ks, kx, ky;
+			kx = 1920 / ww;
+			ky = 1080 / wh;
+			TupleMin2(kx, ky, &ks);
+			if (ks > 8)
+				ks = 8;
+			ww = ww * ks;
+			wh = wh * ks;
+
+			wcy = r51 + wh / 2;
+			wcx = c51 + ww / 2;
+
+			if (hWindow.IsHandleValid())
+				hWindow.CloseWindow();
+
+			hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
+			hWindow.SetPart((Hlong)r51 - 10, (Hlong)c51 - 10, (Hlong)r52 + 10, (Hlong)c52 + 10);
+			hWindow.DispImage(m_ho_Im);
+			HTuple hv_a, r, c;
+			CountObj(ho_WADefect, &hv_a);
+			//AreaCenter(ho_MeanderDefects, &a, &r, &c);
+			hWindow.SetColor("blue");
+			hWindow.SetLineWidth(1);
+			hWindow.DispObj(m_ho_CG);
+			hWindow.SetColor("green");
+			hWindow.DispObj(m_ho_CI);
+			if (hv_a.I() > 0)
+			{
+
+				hWindow.SetLineWidth(2);
+				hWindow.SetColor("coral");
+				hWindow.DispObj(m_ho_CI);
+				
+				hWindow.SetDraw("margin");
+				hWindow.SetColor("red");
+				hWindow.SetLineWidth(3);
+				hWindow.DispObj(ho_WADefect);
+			}
+			else
+
+				hWindow.DispText("No defects found", "window", "center", "center", "green", "shadow", "true");
+
+			//WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
+		}
+
+	}
 }
 
 
 void CTestContoursDlg::OnBnClickedButton16()
 {
-	// TODO: Add your control notification handler code here
+	HObject ho_WADefect, ho_WADefects, ho_Rect;
+	HTuple hv_DOut, hv_nObj;
+	HTuple ht1, ht3, ht2, ht;
+
+
+
+	CountObj(m_ho_ContoursWireAngles, &hv_nObj);
+	GenEmptyObj(&ho_WADefects);
+	CountSeconds(&ht1);
+	int nObj = hv_nObj.I();
+
+	CountSeconds(&ht1);
+	HTuple WAnum;
+	WAnum.Clear();
+	HTuple Ad, Rd, Cd, ti, pn;
+
+	for (int i = 1; i <= nObj; i++)
+	{
+		m_hv_meander = (HTuple)i;
+		ProcessMeander(m_ho_Im, m_ho_ContoursWireAngles, m_ho_RectanglesWireAngles, m_ho_Gi,
+			&ho_WADefect, &ho_Rect, &m_ho_CG, &m_ho_CI,
+			m_hv_thr, m_hv_meander, m_hw_absmbwa, m_hw_absspwa, m_hv_ctype, m_fszwa,
+			&hv_DOut);
+		ConcatObj(ho_WADefects, ho_WADefect, &ho_WADefects);
+		AreaCenter(ho_WADefect, &Ad, &Rd, &Cd);
+		if (Ad > 0)
+			TupleConcat(WAnum, (HTuple)i, &WAnum);
+	}
+	CountSeconds(&ht3);
+	ht = ht3 - ht1;
+	double msec1 = ht.D()*1000.;
+
+	HTuple DefWAnum;
+	ConcatObj(ho_WADefects, ho_WADefect, &ho_WADefects);
+	CountObj(ho_WADefects, &DefWAnum);
+
+	HTuple W, H, srow, scol;
+	GetImageSize(m_ho_Im, &W, &H);
+
+	HTuple ks, kx, ky;
+	kx = 1920. / W;
+	ky = 1080. / H;
+	TupleMin2(kx, ky, &ks);
+	///*if (ks > 8)
+	//	ks = 8;*/
+	TupleInt(W * ks*0.9, &W);
+	TupleInt(H * ks*0.9, &H);
+	//H = int(H * ks);
+
+	printf("\n***Wire angles cycle, (%d)-->%.2f msec***", nObj, msec1);
+	//HTuple r51, c51, r52, c52, ww, wh, wcx, wcy;
+	WriteObject(ho_WADefects, "C:\\Temp1\\ho_ho_ho_WADefects.hobj");
+	if (disp)
+	{
+		if (hWindow.IsHandleValid())
+			hWindow.CloseWindow();
+
+		hWindow.OpenWindow(0, WINST, W, H, 0, "visible", "");
+		hWindow.DispImage(m_ho_Im);
+		hWindow.SetDraw("margin");
+		hWindow.SetColor("red");
+		hWindow.SetLineWidth(5);
+		if (DefWAnum > 0)
+		{
+			hWindow.DispObj(ho_WADefects);
+			hWindow.DispText("Defected wire angles: " + (DefWAnum), "window", "center", "center", "red", "shadow", "true");
+
+			for (ti = 1; ti <= DefWAnum; ti = ti + 1)
+			{
+				SelectObj(ho_WADefects, &ho_WADefect, ti);
+				AreaCenter(ho_WADefect, &Ad, &Rd, &Cd);
+				pn = HTuple(WAnum[ti - 1]);
+				/*HTuple hrd;
+				TupleRand(1,&hrd);
+				hrd = (int)(hrd * 10);*/
+				hWindow.DispText((pn), "image", Rd, Cd, "red", "box", "false");
+			}
+			hWindow.SetLineWidth(2);
+			hWindow.SetColor("coral");
+			hWindow.DispObj(m_ho_CI);
+
+		}
+		else
+			hWindow.DispText("No defected wire angles found" + (DefWAnum), "window", "center", "center", "forest green", "shadow", "true");
+		//hWindow.Click();
+
+		// Close the window
+		//hWindow.CloseWindow();
+	}
 }
 
 
@@ -2654,5 +2863,53 @@ void CTestContoursDlg::OnEnChangeEdit11()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT11, cstr);
-	m_hv_wa = _tstof(cstr);
+	m_hv_wa = (int)_tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit14()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT14, cstr);
+	m_hw_absmbpad = _tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit15()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT15, cstr);
+	m_hw_abssppad = _tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit16()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT16, cstr);
+	m_fszwa = (int)_tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit13()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT13, cstr);
+	m_fszpad = (int)_tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit17()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT17, cstr);
+	m_hw_absmbwa = _tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit18()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT18, cstr);
+	m_hw_absspwa = _tstof(cstr);
 }
