@@ -1628,7 +1628,7 @@ void CTestContoursDlg::OnBnClickedButton5()
 	//OnBnClickedButton1();
 	ReadObject(&m_ho_CI, "C:\\Temp1\\CI.hobj");
 	ReadObject(&m_ho_CG, "C:\\Temp1\\CG.hobj");
-	ReadImage(&m_ho_Im, "C:\\Temp1\\Im2.tif");
+	ReadImage(&m_ho_Im, "C:\\Temp1\\Im.tif");
 	ReadObject(&m_ho_Gi, "C:\\Temp1\\Gi.hobj");
 	printf("***Files Open***");
 
