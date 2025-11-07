@@ -1132,7 +1132,7 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	TupleLength(hv_RowG, &hv_nG);
 	int nI = hv_nI.I();
 	int nG = hv_nG.I();
-	int isz = 5;
+	int isz = 25;
 
 	if (hv_nI > hv_sz + 1) // normal case
 	{
@@ -2639,53 +2639,49 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 			hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
 			hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
 			hWindow.DispImage(m_ho_Im);
-			//hWindow.SetColor("blue");
-			//hWindow.SetLineWidth(1);
-			//hWindow.DispObj(m_ho_CG);
-			//hWindow.SetColor("green");
-			//hWindow.DispObj(m_ho_CI);
+			/*hWindow.SetColor("blue");
+			hWindow.SetLineWidth(1);
+			hWindow.DispObj(m_ho_CG);
+			hWindow.SetColor("green");
+			hWindow.DispObj(m_ho_CI);*/
 			HTuple hv_a, r, c;
 			CountObj(ho_PadDefect, &hv_a);
 			//AreaCenter(ho_MeanderDefects, &a, &r, &c);
 			if (hv_a.I() > 0)
 			{
-				hWindow.SetColor("blue");
+				/*hWindow.SetColor("blue");
 				hWindow.SetLineWidth(1);
 				hWindow.DispObj(m_ho_CG);
 
 				hWindow.SetLineWidth(2);
 				hWindow.SetColor("coral");
-				hWindow.DispObj(m_ho_CI);
+				hWindow.DispObj(m_ho_CI);*/
+				//}
+					/*hWindow.SetColor("coral");
+				else
+					hWindow.SetColor("green");*/
+					/*hWindow.SetLineWidth(3);
+					hWindow.DispObj(ho_ContourOut);*/
 
+
+
+					/*hWindow.SetColor("cyan");
+					hWindow.SetLineWidth(2);
+					hWindow.DispObj(ho_ContourGm);*/
+
+					//if (a.I() > 1)
+					//{
 				hWindow.SetDraw("margin");
 				hWindow.SetColor("red");
 				hWindow.SetLineWidth(3);
 				hWindow.DispObj(ho_PadDefect);
 			}
-					//hWindow.SetColor("coral");
 			else
-			{
-				hWindow.SetColor("green");
-				hWindow.SetLineWidth(3);
-				hWindow.DispObj(m_ho_CI);
-
-
-
-				//	hWindow.SetColor("cyan");
-				//	hWindow.SetLineWidth(2);
-				//	hWindow.DispObj(ho_ContourGm);
-
-				//	//if (a.I() > 1)
-				//	//{
-				
-			//}
-			//else
 				//hWindow.SetFont("Courier-Bold-14");
 				hWindow.DispText("No defects found", "window", "center", "center", "green", "shadow", "true");
-			}
 			// Keep the window open until a key is pressed
 			//WriteTuple(Displacement, "C:\\Temp1\\hv_Displacement.tup");
-			//WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
+			WriteTuple(hv_DOut, "C:\\Temp1\\hv_Dout.tup");
 			//hWindow.Click();
 
 			// Close the window

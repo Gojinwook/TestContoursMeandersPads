@@ -17,6 +17,8 @@
 using namespace HalconCpp;
 //using namespace std;
 
+extern int ipad;
+
 namespace Functions
 {
 	// Procedures 
@@ -146,7 +148,7 @@ namespace Functions
 		int *pK;
 
 		float digs, digc, digr, digsmin;
-		int kmin;
+		int kmin=0;
 		int iz = isz;
 		
 
@@ -945,13 +947,14 @@ namespace Functions
 
 		Region_Threshold_SubPixH(ho_RegionIR, ho_Im, hv_thr, &hv_RowsSubI, &hv_ColsSubI);
 		GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
-		AreaCenterXld(ho_ContourIK, &hv_AreaIK, &hv_RowIK, &hv_ColIK, &hv_PointOrderIK);
-		if (0 != (hv_PointOrderIK == HTuple("negative")))
-		{
-			ReverseContourH(ho_ContourIK, &ho_ContourIK);
-			//area_center_xld (ContourIK, Area, RowBcl, ColBcl, PointOrderB1)
-			//nrev := nrev+1
-		}
+		// 251106 removed
+		//AreaCenterXld(ho_ContourIK, &hv_AreaIK, &hv_RowIK, &hv_ColIK, &hv_PointOrderIK);
+		//if (0 != (hv_PointOrderIK == HTuple("negative")))
+		//{
+		//	ReverseContourH(ho_ContourIK, &ho_ContourIK);
+		//	//area_center_xld (ContourIK, Area, RowBcl, ColBcl, PointOrderB1)
+		//	//nrev := nrev+1
+		//}
 
 		//RowGsm := RowGsm[meander-1]
 		//ColGsm := ColGsm[meander-1]
@@ -1014,12 +1017,12 @@ namespace Functions
 
 		GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
 		AreaCenterXld(ho_ContourIK, &hv_AreaIK, &hv_RowIK, &hv_ColIK, &hv_PointOrderIK);
-		if (0 != (hv_PointOrderIK == HTuple("negative")))
-		{
-			ReverseContourH(ho_ContourIK, &ho_ContourIK);
-			//area_center_xld (ContourIK, Area, RowBcl, ColBcl, PointOrderB1)
-			//nrev := nrev+1
-		}
+		//if (0 != (hv_PointOrderIK == HTuple("negative")))
+		//{
+		//	ReverseContourH(ho_ContourIK, &ho_ContourIK);
+		//	//area_center_xld (ContourIK, Area, RowBcl, ColBcl, PointOrderB1)
+		//	//nrev := nrev+1
+		//}
 
 		//RowGsm := RowGsm[meander-1]
 		//ColGsm := ColGsm[meander-1]
@@ -1065,6 +1068,7 @@ namespace Functions
 		LengthXld(ho_Bordersi, &hv_LengthBI);
 		TupleSortIndex(hv_LengthBI, &hv_Indices);
 		TupleInverse(hv_Indices, &hv_Inverted);
+		/////// exc 10.31-9:50
 		hv_imax1 = HTuple(hv_Inverted[0]) + 1;
 		if (0 != (hv_nB > 1))
 		{
@@ -1125,6 +1129,7 @@ namespace Functions
 			//* H
 			//reduce_domain (Im, Rectangle5, ImageReduced)
 			ThresholdSubPix(ho_Im, &ho_Bordersi, hv_thr);
+			WriteObject(ho_Bordersi, "C:\\Temp1\\ho_Bordersi.hobj");
 			BuildBorderContour(ho_Bordersi, &ho_ContourH, ho_BorderEPs);
 			GetContourXld(ho_ContourH, &hv_RowsSubI, &hv_ColsSubI);
 			AreaCenterXld(ho_ContourH, &hv_AreaI, &hv_RowIK, &hv_ColIK, &hv_PointOrderG);
@@ -1146,6 +1151,115 @@ namespace Functions
 			SelectObj(ho_RegionsIR, &(*ho_RegionIR), HTuple(hv_Inverted[0]) + 1);
 
 			int n=Region_Threshold_SubPix(ho_Im, *ho_RegionIR, hv_thr, pRowsSubI, pColsSubI);
+
+			hv_RowsSubI = HTuple(pRowsSubI, n);
+			hv_ColsSubI = HTuple(pColsSubI, n);
+			GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
+
+			//Region_Threshold_SubPix((*ho_RegionIR), ho_Im, hv_thr, &hv_RowsSubI, &hv_ColsSubI);
+			//GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
+			(*ho_ContourOut) = ho_ContourIK;
+			//* IK end
+			free(pRowsSubI);
+			free(pColsSubI);
+		}
+		return;
+	}
+
+	void BuildRealContourI(HObject ho_Im, HObject ho_Rectangle5, HObject ho_RegionI, HObject ho_RegionGPad,
+		HObject *ho_ContourOut, HObject *ho_BorderEPs, HObject *ho_RegionIR, HObject *ho_RBEp,
+		HTuple hv_ctype, HTuple hv_thr, HTuple hv_pdil)
+	{
+
+		float *pRowsSubI, *pColsSubI;
+		// Local iconic variables
+		HObject  ho_Bordersi, ho_Regionsi, ho_RegionsIntersection, ho_RegionDilation, ho_RegionIntersection;
+		HObject  ho_Bordersii, ho_Bi, ho_RBi, ho_ContourH, ho_RegionIr, ho_RegionsIR;
+		HObject  ho_ContourIK, ho_RP, ho_RPd, ho_RPdI, ho_ImageReduced;
+
+		// Local control variables
+		HTuple  hv_Areai, hv_Row1, hv_Column1, hv_AreaI;
+		HTuple  hv_KA, hv_n, hv_j, hv_RowsSubI, hv_ColsSubI, hv_RowIK;
+		HTuple  hv_ColIK, hv_PointOrderG, hv_AreaIR, hv_Column;
+		HTuple  hv_Indices, hv_Inverted;
+		HTuple  hv_ni, hv_amax, hv_jmax, hv_Row, hv_Col, hv_a, hv_Row2, hv_Column2;
+
+		//** BuildRealContour 20.10.2025
+		if (0 != (hv_ctype == 1))
+		{
+			//* H
+			//* H
+	//fill_up (Rectangle5, Rectangle5fu)
+			Intersection(ho_Rectangle5, ho_RegionGPad, &ho_RP);
+			DilationCircle(ho_RP, &ho_RPd, hv_pdil);
+			//pdil := 10
+			Intersection(ho_RPd, ho_RegionI, &ho_RPdI);
+			//reduce_domain (Im, Rectangle5, ImageReduced)
+			ReduceDomain(ho_Im, ho_Rectangle5, &ho_ImageReduced);
+			ThresholdSubPix(ho_ImageReduced, &ho_Bordersi, hv_thr);
+			CountObj(ho_Bordersi, &hv_ni);
+			hv_amax = 0;
+			hv_jmax = -1;
+			GenEmptyObj(&ho_Bordersii);
+			{
+				HTuple end_val15 = hv_ni;
+				HTuple step_val15 = 1;
+				for (hv_j = 1; hv_j.Continue(end_val15, step_val15); hv_j += step_val15)
+				{
+					SelectObj(ho_Bordersi, &ho_Bi, hv_j);
+					GetContourXld(ho_Bi, &hv_Row, &hv_Col);
+					TupleLength(hv_Row, &hv_n);
+					if (0 != (hv_n < 50))
+					{
+						continue;
+					}
+					GenRegionPoints(&ho_RBi, hv_Row, hv_Col);
+					DilationCircle(ho_RBi, &ho_RegionDilation, 3.5);
+					Intersection(ho_RegionDilation, ho_RP, &ho_RegionIntersection);
+					AreaCenter(ho_RegionIntersection, &hv_a, &hv_Row2, &hv_Column2);
+					if (0 != (hv_a < 50))
+					{
+						continue;
+					}
+					else
+					{
+						if (0 != (hv_a > hv_amax))
+						{
+							ho_Bordersii = ho_Bi;
+							hv_amax = hv_a;
+						}
+					}
+				}
+			}
+			CountObj(ho_Bordersii, &hv_n);
+			if (0 != (hv_n == 0))
+			{
+				SelectObj(ho_Bordersi, &(*ho_ContourOut), 1);
+				return;
+				//ContourOut := ContourH
+			}
+
+			BuildBorderContour(ho_Bordersii, &ho_ContourH, &(*ho_RBEp));
+			GetContourXld(ho_ContourH, &hv_RowsSubI, &hv_ColsSubI);
+			AreaCenterXld(ho_ContourH, &hv_AreaI, &hv_RowIK, &hv_ColIK, &hv_PointOrderG);
+			GenRegionContourXld(ho_ContourH, &(*ho_RegionIR), "filled");
+			(*ho_ContourOut) = ho_ContourH;
+			//H end
+		}
+		else
+		{
+			pRowsSubI = (float *)malloc(5000 * sizeof(float));
+			pColsSubI = (float *)malloc(5000 * sizeof(float));
+			//* IK
+			Threshold(ho_Im, &ho_RegionIr, hv_thr, 255);
+			Intersection(ho_RegionIr, ho_Rectangle5, &(*ho_RegionIR));
+			Connection((*ho_RegionIR), &ho_RegionsIR);
+			AreaCenter(ho_RegionsIR, &hv_AreaIR, &hv_Row, &hv_Column);
+			TupleSortIndex(hv_AreaIR, &hv_Indices);
+			TupleInverse(hv_Indices, &hv_Inverted);
+			SelectObj(ho_RegionsIR, &(*ho_RegionIR), HTuple(hv_Inverted[0]) + 1);
+
+			int n = Region_Threshold_SubPix(ho_Im, *ho_RegionIR, hv_thr, pRowsSubI, pColsSubI);
 
 			hv_RowsSubI = HTuple(pRowsSubI, n);
 			hv_ColsSubI = HTuple(pColsSubI, n);

@@ -1132,7 +1132,7 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	TupleLength(hv_RowG, &hv_nG);
 	int nI = hv_nI.I();
 	int nG = hv_nG.I();
-	int isz = 5;
+	int isz = 25;
 
 	if (hv_nI > hv_sz + 1) // normal case
 	{

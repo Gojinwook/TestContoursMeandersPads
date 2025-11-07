@@ -1132,7 +1132,7 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	TupleLength(hv_RowG, &hv_nG);
 	int nI = hv_nI.I();
 	int nG = hv_nG.I();
-	int isz = 5;
+	int isz = 25;
 
 	if (hv_nI > hv_sz + 1) // normal case
 	{
@@ -2656,11 +2656,6 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 				hWindow.SetLineWidth(2);
 				hWindow.SetColor("coral");
 				hWindow.DispObj(m_ho_CI);
-
-				hWindow.SetDraw("margin");
-				hWindow.SetColor("red");
-				hWindow.SetLineWidth(3);
-				hWindow.DispObj(ho_PadDefect);
 			}
 					//hWindow.SetColor("coral");
 			else
@@ -2677,7 +2672,10 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 
 				//	//if (a.I() > 1)
 				//	//{
-				
+				//hWindow.SetDraw("margin");
+				//hWindow.SetColor("red");
+				//hWindow.SetLineWidth(3);
+				//hWindow.DispObj(ho_PadDefect);
 			//}
 			//else
 				//hWindow.SetFont("Courier-Bold-14");

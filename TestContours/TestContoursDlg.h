@@ -42,8 +42,8 @@ public:
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 
-	HObject m_ho_CG, m_ho_CI, m_ho_Cbj, m_ho_ContoursGrsm, m_ho_MeanderRects, m_ho_RegionG;
-	HObject m_ho_ContoursGrsmPi, m_ho_RectanglesPadsIsol, m_ho_ContoursGrsmPc, m_ho_RectanglesPadsCon, m_ho_ContoursWireAngles, m_ho_RectanglesWireAngles;
+	HObject m_ho_CG, m_ho_CI, m_ho_Cbj, m_ho_ContoursGrsm, m_ho_MeanderRects, m_ho_RegionG, m_ho_RegionI, m_ho_RegionGPad;
+	HObject m_ho_ContoursGPadsIsol, m_ho_RegionsGPadsIsol, m_ho_ContoursGPadsCon, m_ho_RegionsGPadsCon, m_ho_ContoursWireAngles, m_ho_RectanglesWireAngles;
 	HTuple m_hv_ColG, m_hv_RowG, m_hv_ColI, m_hv_RowI, m_hv_DistIG, m_hv_DistIG2;
 	HObject m_ho_Im, m_ho_Gi;
 	HTuple m_hv_thr, m_hv_ctype, m_hv_meander, m_hw_absmb, m_hw_abssp, m_hw_absmbwa, m_hw_absspwa, m_hw_absmbpad, m_hw_abssppad;
@@ -90,4 +90,11 @@ public:
 	afx_msg void OnEnChangeEdit13();
 	afx_msg void OnEnChangeEdit17();
 	afx_msg void OnEnChangeEdit18();
+	afx_msg void OnBnClickedButton17();
+	afx_msg void OnBnClickedButton18();
+	afx_msg void OnEnChangeEdit19();
+	afx_msg void OnEnChangeEdit22();
+	afx_msg void OnEnChangeEdit23();
+	afx_msg void OnEnChangeEdit21();
+	afx_msg void OnBnClickedButton19();
 };
