@@ -640,6 +640,149 @@ namespace Functions
 		return pos_sub;
 	}
 
+	int Region_Threshold_SubPixGap(HObject ho_Im, HObject ho_RegSel, int thr, float *rows_sub, float *cols_sub, int *ngap)
+	{
+		HTuple tl, h, w, t, hiptr;
+		GetImagePointer1(ho_Im, &hiptr, &t, &w, &h);
+		UINT8 *pIm = (UINT8 *)(Hlong *)hiptr.L();
+		int im_w = (int)w.L();
+		int im_h = (int)h.L();
+
+
+		HTuple hv_Rows, hv_Cols, hv_Cont_Len;
+		UINT8 gray0, gray1, gray2;
+		int x0 = 0, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+		double xR1, yR1, xR2, yR2;
+		int pos_sub = 0;
+
+		GetRegionContour(ho_RegSel, &hv_Rows, &hv_Cols);
+		UINT64* rows = (UINT64*)hv_Rows.LArr();
+		UINT64* cols = (UINT64*)hv_Cols.LArr();
+
+		TupleLength(hv_Rows, &hv_Cont_Len);
+		int count_len = (int)hv_Cont_Len.LArr()[0];
+
+		// ¬´¬Ö¬ã¬ä ¬ß¬Ñ ¬Õ¬í¬â¬Ü¬å
+		bool reg_hole = Test_Hole(pIm, im_w, im_h, rows, cols, count_len, thr);
+
+		int pos, j, jp;
+		double d=-1.;
+		*ngap = -1;
+		for (pos = 0; pos < count_len; pos++)
+		{
+			// * ¬°¬Ü¬â¬å¬Ø¬Ö¬ß¬Ú¬Ö ¬Ú¬ã¬ã¬Ý¬Ö¬Õ¬å¬Ö¬Þ¬à¬Ô¬à ¬á¬Ú¬Ü¬ã¬Ö¬Ý¬ñ
+			int pos_next = pos + 1;
+			if (pos_next > (count_len - 1))
+			{
+				pos_next = 0;
+			}
+			int pos_prev = pos - 1;
+			if (pos_prev < 0)
+			{
+				pos_prev = count_len - 1;
+			}
+			int row_prev = (int)rows[pos_prev];
+			int col_prev = (int)cols[pos_prev];
+			int row_next = (int)rows[pos_next];
+			int col_next = (int)cols[pos_next];
+			int row_curr = (int)rows[pos];
+			int col_curr = (int)cols[pos];
+
+			// ¬©¬Ñ ¬á¬â¬Ö¬Õ¬Ö¬Ý¬Ñ¬Þ¬Ú ¬Ú¬Ù¬à¬Ò¬â¬Ñ¬Ø¬Ö¬ß¬Ú¬ñ
+			if (row_curr >= im_h - 1 || col_curr >= im_w - 1 || row_curr == 0 || col_curr == 0)
+			{
+				continue;
+			}
+
+			// * ¬¯¬Ñ¬á¬â¬Ñ¬Ó¬Ý¬Ö¬ß¬Ú¬Ö
+			bool f_Down, f_Left;
+			f_Down = row_curr > row_prev || row_curr < row_next;
+			f_Left = col_curr < col_prev || col_curr > col_next;
+
+			gray0 = Get_Gray_Val(pIm, im_w, im_h, (int)rows[pos], (int)cols[pos]);
+
+			// *-- Cols ----------------------------------------------------------------------
+			gray1 = Get_Gray_Val(pIm, im_w, im_h, row_curr, col_curr + 1);
+			gray2 = Get_Gray_Val(pIm, im_w, im_h, row_curr, col_curr - 1);
+			bool f_Cols_Available = Interpolation_Sub(reg_hole, f_Down, gray0, gray1, gray2, col_curr, row_curr, thr, xR1, yR1);
+
+			// *--- Rows ----------------------------------------------------------------------
+			gray1 = Get_Gray_Val(pIm, im_w, im_h, row_curr + 1, col_curr);
+			gray2 = Get_Gray_Val(pIm, im_w, im_h, row_curr - 1, col_curr);
+			bool f_Rows_Available = Interpolation_Sub(reg_hole, f_Left, gray0, gray1, gray2, row_curr, col_curr, thr, yR2, xR2);
+
+			// *--- ¬³¬à¬Ò¬Ú¬â¬Ñ¬Ö¬Þ ¬â¬Ö¬Ù¬å¬Ý¬î¬ä¬Ñ¬ä ------------------------------------------------------
+			if (f_Cols_Available && f_Rows_Available)
+			{
+				if ((xR1 > xR2 && yR1 > yR2) || (xR1 <= xR2 && yR1 < yR2))
+				{
+					rows_sub[pos_sub] = yR2;
+					cols_sub[pos_sub] = xR2;
+					pos_sub += 1;
+					if (pos_sub >= 2)
+					{
+						j = pos_sub - 1;
+						jp = pos_sub - 2;
+						d = abs(rows_sub[j] - rows_sub[jp]) + abs(cols_sub[j] - cols_sub[jp]);
+						if (d > 2.)
+							*ngap = pos_sub - 1;
+					}
+
+					rows_sub[pos_sub] = yR1;
+					cols_sub[pos_sub] = xR1;
+					pos_sub += 1;
+				}
+				else
+				{
+					rows_sub[pos_sub] = yR1;
+					cols_sub[pos_sub] = xR1;
+					pos_sub += 1;
+					if (pos_sub >= 2)
+					{
+						j = pos_sub - 1;
+						jp = pos_sub - 2;
+						d = abs(rows_sub[j] - rows_sub[jp]) + abs(cols_sub[j] - cols_sub[jp]);
+						if (d > 2.)
+							*ngap = pos_sub - 1;
+					}
+					rows_sub[pos_sub] = yR2;
+					cols_sub[pos_sub] = xR2;
+					pos_sub += 1;
+				}
+			}
+			else if (f_Cols_Available)
+			{
+				rows_sub[pos_sub] = yR1;
+				cols_sub[pos_sub] = xR1;
+				pos_sub += 1;
+			}
+			else if (f_Rows_Available)
+			{
+				rows_sub[pos_sub] = yR2;
+				cols_sub[pos_sub] = xR2;
+				pos_sub += 1;
+			}
+			if (pos_sub >= 2)
+			{
+				j = pos_sub - 1;
+				jp = pos_sub - 2;
+				d = abs(rows_sub[j] - rows_sub[jp]) + abs(cols_sub[j] - cols_sub[jp]);
+				if (d > 2.)
+					*ngap = pos_sub - 1;
+			}
+					
+		}
+		if (*ngap == -1)
+		{
+			j = 0;
+			jp = pos_sub - 1;
+			d = abs(rows_sub[j] - rows_sub[jp]) + abs(cols_sub[j] - cols_sub[jp]);
+			if (d > 2.)
+				*ngap = pos_sub - 1;
+		}
+
+		return pos_sub;
+	}
 
 	void MoveContourH(HObject ho_Contour, HObject *ho_ContourOut, HTuple hv_mr, HTuple hv_mc)
 	{
@@ -1183,7 +1326,7 @@ namespace Functions
 		HTuple  hv_ColIK, hv_PointOrderG, hv_AreaIR, hv_Column;
 		HTuple  hv_Indices, hv_Inverted;
 		HTuple  hv_ni, hv_amax, hv_jmax, hv_Row, hv_Col, hv_a, hv_Row2, hv_Column2;
-
+		int ng; //gap position
 		//** BuildRealContour 20.10.2025
 		if (0 != (hv_ctype == 1))
 		{
@@ -1258,15 +1401,50 @@ namespace Functions
 			TupleSortIndex(hv_AreaIR, &hv_Indices);
 			TupleInverse(hv_Indices, &hv_Inverted);
 			SelectObj(ho_RegionsIR, &(*ho_RegionIR), HTuple(hv_Inverted[0]) + 1);
-
-			int n = Region_Threshold_SubPix(ho_Im, *ho_RegionIR, hv_thr, pRowsSubI, pColsSubI);
-
-			hv_RowsSubI = HTuple(pRowsSubI, n);
-			hv_ColsSubI = HTuple(pColsSubI, n);
-			GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
-
-			//Region_Threshold_SubPix((*ho_RegionIR), ho_Im, hv_thr, &hv_RowsSubI, &hv_ColsSubI);
-			//GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
+			int n = 0;
+			HTuple Epc, Epr;
+			Epr.Clear();
+			Epc.Clear();
+			if (hv_AreaIR > 0)
+			{
+				int n = Region_Threshold_SubPixGap(ho_Im, *ho_RegionIR, hv_thr, pRowsSubI, pColsSubI, &ng);
+				hv_RowsSubI = HTuple(pRowsSubI, n);
+				hv_ColsSubI = HTuple(pColsSubI, n);
+				GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);
+				if (ng > 0 && ng<n-1)
+				{
+					Epc[0] = hv_ColsSubI[ng];
+					Epr[0] = hv_RowsSubI[ng];
+					Epc[1] = hv_ColsSubI[ng - 1];
+					Epr[1] = hv_RowsSubI[ng - 1];
+					if (ng > 1)
+					{
+						Epc[1] = hv_ColsSubI[ng - 2];
+						Epr[1] = hv_RowsSubI[ng - 2];
+					}
+					
+					GenRegionPoints(ho_RBEp, Epr, Epc);
+				}
+				else if (ng == n - 1)
+				{
+					Epc[0] = hv_ColsSubI[ng];
+					Epc[1] = hv_ColsSubI[0];
+					Epr[0] = hv_RowsSubI[ng];
+					Epr[1] = hv_RowsSubI[0];
+					GenRegionPoints(ho_RBEp, Epr, Epc);
+				}
+				else
+					GenEmptyObj(ho_RBEp);
+				
+			}
+				
+			else
+			{
+				GenEmptyObj(&ho_ContourIK);
+				GenEmptyObj(ho_RBEp);
+			}
+			/*Region_Threshold_SubPix((*ho_RegionIR), ho_Im, hv_thr, &hv_RowsSubI, &hv_ColsSubI);
+			GenContourPolygonXld(&ho_ContourIK, hv_RowsSubI, hv_ColsSubI);*/
 			(*ho_ContourOut) = ho_ContourIK;
 			//* IK end
 			free(pRowsSubI);

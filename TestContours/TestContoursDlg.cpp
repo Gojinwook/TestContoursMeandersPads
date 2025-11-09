@@ -1102,17 +1102,26 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	
 	ReduceDomain(ho_Im, ho_Rectangle5, &ho_Imr);
 	CropDomain(ho_Imr, &ho_Imc);
-	if (save)
-	{
-		WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5.hobj");
-		WriteObject(ho_Imr, "C:\\Temp1\\ho_Imr.hobj");
-		//WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5.hobj");
-	}
-
+	//if (save)
+	//{
+	//	WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5.hobj");
+	//	WriteObject(ho_Imr, "C:\\Temp1\\ho_Imr.hobj");
+	//	//WriteObject(ho_Rectangle5, "C:\\Temp1\\ho_Rectangle5.hobj");
+	//}
+	CountSeconds(&ht1);
 	BuildRealContourI(ho_Imr, ho_Rectangle5, ho_RegionI, ho_RegionGPad,//  building I contour
 		&ho_ContourOut, &ho_BorderEPs, ho_RegionIR, ho_RBEp,
 		hv_ctype, hv_thr, hv_pdil);
-	HTuple ha, hr, hc, hl;
+	HTuple ha, hr, hc, hl, CRow, CCol;
+	if (hv_ctype == 0)
+	{
+		HObject RegC;
+		GetContourXld(ho_ContourOut, &CRow, &CCol);
+		GenRegionPoints(&RegC, CRow, CCol);
+		//DilationCircle(RegC, &RegC, 1);
+
+	}
+		//GenEmptyObj(ho_RBEp);
 	//AreaCenter(ho_BorderEPs, &ha, &hr, &hc);
 	CountSeconds(&ht2);
 	GetContourXld(ho_ContourOut, &hv_RowI, &hv_ColI);
@@ -1123,7 +1132,7 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	HTuple hv_DispElong, hv_Wch, hv_Wch1, hv_Def, hv_Def1;
 	HTuple hv_sz = 31;
 
-	HTuple ThrMB, ThrSP, DefSP, DefMB, Def, Def1, DefA, RowD, ColD, nD, Rd;
+	HTuple ThrMB, ThrSP, DefSP, DefMB, Def, Def1, DefA, RowD, ColD, nD, Rd, numD;
 	HObject CircleD, CirclesD, CircleDu;
 	HObject RBI, RBG;
 	HObject ho_ObjectD;
@@ -1133,18 +1142,19 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	int nI = hv_nI.I();
 	int nG = hv_nG.I();
 	int isz = 5;
-
+	float aprc=1.;
 	if (hv_nI > hv_sz + 1) // normal case
 	{
 		//goto norealcontour;
-
-		
+		//if(ho_PadDefects)
+		//CountObj(*ho_PadDefects, &numD);
 		
 		GenRegionPoints(&RBG, hv_RowG, hv_ColG);
 		GenRegionPoints(&RBI, hv_RowI, hv_ColI);
 	
 		AreaCenterXld(ho_ContourOut, &hv_ai, &hv_rowIc, &hv_colIc, &hv_poI);
 		AreaCenterXld(ho_CG, &hv_ag, &hv_rowGc, &hv_colGc, &hv_poG);
+		aprc = (float)(hv_ai.D()/ hv_ag.D());
 		if (hv_poI != hv_poG)
 		{
 			ReverseContourH(ho_ContourOut, &ho_ContourOut);
@@ -1271,6 +1281,14 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 		TupleSelectMask(hv_RowI, DefA, &RowD);
 		TupleSelectMask(hv_ColI, DefA, &ColD);
 		TupleLength(RowD, &nD);
+		if (aprc<0.7 || aprc > 1.3)
+		{
+			TupleInt(hv_RowI, &RowD);
+			TupleInt(hv_ColI, &ColD);
+			TupleLength(RowD, &nD);
+			nopad = 1;
+		}
+			
 
 		free(pD);
 		free(pRowI);
@@ -1292,6 +1310,7 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 			nD = -1;
 			nopad = 1;
 	}
+	
 //norealcontour:
 //	;
 	//float* pDisp = ConvertTupleToFloat(Displacement);
@@ -1345,14 +1364,21 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 		Connection(CircleD, &CircleDc);
 		CountObj(CircleDc, &nDc);
 		GenEmptyObj(&CircleD);
+		if (nopad == 0)
 		{
-			HTuple end_val17 = nDc;
-			HTuple step_val17 = 1;
-			for (hv_k = 1; hv_k.Continue(end_val17, step_val17); hv_k += step_val17)
+			//HTuple end_val17 = nDc;
+			//HTuple step_val17 = 1;
+			for (hv_k = 1; hv_k<=nDc; hv_k += 1)
 			{
 				SelectObj(CircleDc, &ho_ObjectD, hv_k);
+				
+				if (save)
+				{
+					WriteObject(RGEP, "C:\\Temp1\\RGEP.hobj");
+					WriteObject(*ho_RBEp, "C:\\Temp1\\ho_RBEp.hobj");
+					WriteObject(ho_ObjectD, "C:\\Temp1\\ho_ObjectD.hobj");
+				}
 				Union2(*ho_RBEp, RGEP, &RBE);
-
 				//intersection (ObjectD, RBEp3, RegionIntersection1)
 				Intersection(ho_ObjectD, RBE, &ho_RegionIntersection1);
 				//union2 (RBEp3, RGEP, RBE)
@@ -1387,8 +1413,11 @@ void ProcessPads(HObject ho_Im, HObject ho_ContoursGrsm, HObject ho_PadRects, HO
 	else if (nD == -1)
 		//GenCircle(&CircleD, hv_rowGc, hv_colGc, 10);
 		CircleD = ho_Rectangle5;
+	
 	else
 		GenEmptyObj(&CircleD);
+	if (nopad == 1)
+		CircleD = ho_Rectangle5;
 	CountSeconds(&ht6);
 	//(*ho_ContourOut) = ho_ContourH;
 	//CopyObj(CircleDu, ho_MeanderDefects, 0, 1);
@@ -2647,11 +2676,11 @@ void CTestContoursDlg::OnBnClickedButton11() //Isolated pad single cycle
 			HTuple hv_a, r, c;
 			CountObj(ho_PadDefect, &hv_a);
 			//AreaCenter(ho_MeanderDefects, &a, &r, &c);
-			if (hv_a.I() > 0)
+			if (hv_a.I() > 0 )
 			{
-				hWindow.SetColor("blue");
+				/*hWindow.SetColor("blue");
 				hWindow.SetLineWidth(1);
-				hWindow.DispObj(m_ho_CG);
+				hWindow.DispObj(m_ho_CG);*/
 
 				hWindow.SetLineWidth(2);
 				hWindow.SetColor("coral");
