@@ -5,6 +5,7 @@
 #pragma once
 
 #include "HalconCpp.h"
+#include "FWMFuncs.h"
 
 using namespace HalconCpp;
 
@@ -56,6 +57,34 @@ public:
 	int disp; // display results
 	HObject m_ho_Rectangle5;
 	HWindow hWindow;
+	HTuple m_hv_pathModel;
+
+	HObject m_ho_ImIRBP;
+	HObject m_ho_RegProc, m_ho_RegNoProc, m_ho_RegionCut, m_ho_SkeletonsFWM, m_ho_RegionsPNPi, m_ho_ImCLC;
+	HObject m_ho_RegionPH;
+	HObject m_ho_RegionsIsl;
+	HObject m_ho_RegionISnoIslnoPh, m_ho_RegionInoIslnoPh;
+	HTuple m_hv_Width, m_hv_Height, m_hv_threshold, m_hv_PHrmin, m_hv_PHamin,
+		m_hv_Islrmin, m_hv_Islamin;
+	// FWM
+	CFWM* m_pFWM;
+	HTuple hv_P1x, hv_P1y, hv_P2x, hv_P2y, hv_P3x, hv_P3y, hv_Pnum, hv_Pnum2, hv_PaddrR, hv_PaddrC, hv_WG, hv_Wi, hv_Puseint;
+	
+	int *pPnum, *pPaddrR, *pPaddrC, *pPuseint;
+	float *pP1x, *pP1y, *pP2x, *pP2y, *pP3x, *pP3y; // measurement tool points arrays
+	// proc. results:
+	float *pWidth, *pWmin, *pmedo, *pmedoe;
+	float *pPInt1x, *pPInt1y, *pPInt2x, *pPInt2y, *pPInt3x, *pPInt3y, *pPInt4x, *pPInt4y;	// intersection points arrays
+	float *pShift;
+	// post proc. results:
+	float *pDefMB, *pXdefMB, *pYdefMB, *pDefSP, *pXdefSP, *pYdefSP;
+	int  *pWG, *pWGS;
+	int Np;		// number of MSs
+	int Na;		// number of addresses (SkeletonsGthin regions)
+	int NaC;		// number of addresses (contours)
+
+	HObject m_ho_RegionsSP, m_ho_RegionsMB;
+	int fwmw;
 	
 
 	afx_msg void OnBnClickedButton3();
@@ -97,4 +126,8 @@ public:
 	afx_msg void OnEnChangeEdit23();
 	afx_msg void OnEnChangeEdit21();
 	afx_msg void OnBnClickedButton19();
+	afx_msg void OnBnClickedButton21();
+	afx_msg void OnBnClickedButton22();
+	afx_msg void OnEnChangeEdit31();
+	afx_msg void OnEnChangeEdit32();
 };

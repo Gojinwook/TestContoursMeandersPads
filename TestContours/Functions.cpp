@@ -1643,6 +1643,175 @@ namespace Functions
 		}
 	} /* SrunmedSLI */
 
+	void ThresholdPHIsp(HObject ho_Im, HObject ho_RegProc, HObject *ho_RegionsPH, HObject *ho_RegionsIsl,
+		HObject *ho_RegionISnoPhnoIsl, HObject *ho_RegionInoPhnoIsl, HObject *ho_RegionI,
+		HTuple hv_thr, HTuple hv_PHrmin, HTuple hv_PHamin, HTuple hv_Islrmin, HTuple hv_Islamin, HTuple hv_PHash, HObject *m_local_ImModified)
+	{
 
+		// Local iconic variables
+		HObject  ho_RegionIi, ho_DomainIm, ho_RegionISi;
+		HObject  ho_RegionIS, ho_RegionFillUp1, ho_RegionDifference3;
+		HObject  ho_RegionPH, ho_RegionIsl, ho_RegionsPHi, ho_RegionsIsli;
+		HObject  ho_RegionsPHii, ho_RegionsIslii, ho_RegionsPHiii, ho_RegionPHiii;
+		//HTuple hv_PHash;
+
+		//hv_PHrmin = 3.0;
+		//hv_PHamin = 5;
+		//Islrmin := 2
+		//Islamin := 5
+
+		/*hv_Islrmin = 2;
+		hv_Islamin = 10;*/
+		if (hv_thr > 250)
+			(hv_thr = 250);
+
+		CopyImage(ho_Im, &(*m_local_ImModified));
+
+		//Threshold(ho_Im, &ho_RegionIi, hv_thr, 255);
+		//GetDomain(ho_Im, &ho_DomainIm);
+		//Difference(ho_DomainIm, ho_RegionIi, &ho_RegionISi);
+		//Intersection(ho_RegionIi, ho_RegProc, &(*ho_RegionI));
+		//Intersection(ho_RegionISi, ho_RegProc, &ho_RegionIS);
+
+		////difference (RegionISi, RegProc, RegionIS)
+
+		//FillUpShape((*ho_RegionI), &ho_RegionFillUp1, "area", 1, 8000);
+		//Difference(ho_DomainIm, ho_RegionFillUp1, &ho_RegionDifference3);
+		//Difference(ho_RegionFillUp1, (*ho_RegionI), &ho_RegionPH);
+
+		//FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 8000);
+		//Difference(ho_DomainIm, (*ho_RegionISnoPhnoIsl), &(*ho_RegionInoPhnoIsl));
+		//Difference((*ho_RegionISnoPhnoIsl), ho_RegionDifference3, &ho_RegionIsl);
+
+		//Connection(ho_RegionPH, &ho_RegionsPHi);
+		//Connection(ho_RegionIsl, &ho_RegionsIsli);
+
+		//SelectShape(ho_RegionsPHi, &ho_RegionsPHii, "area", "and", hv_PHamin, 999999);
+		//SelectShape(ho_RegionsPHii, &(*ho_RegionsPH), "inner_radius", "and", hv_PHrmin,	999999);
+
+		Threshold(ho_Im, &ho_RegionIi, hv_thr, 255);
+		GetDomain(ho_Im, &ho_DomainIm);
+		Difference(ho_DomainIm, ho_RegionIi, &ho_RegionISi);
+		Intersection(ho_RegionIi, ho_RegProc, &(*ho_RegionI));
+		Intersection(ho_RegionISi, ho_RegProc, &ho_RegionIS);
+
+		//difference (RegionISi, RegProc, RegionIS)
+
+		FillUpShape((*ho_RegionI), &ho_RegionFillUp1, "area", 1, 3000);
+		Difference(ho_DomainIm, ho_RegionFillUp1, &ho_RegionDifference3);
+		Difference(ho_RegionFillUp1, (*ho_RegionI), &ho_RegionPH);
+		PaintRegion(ho_RegionPH, *m_local_ImModified, &(*m_local_ImModified), hv_thr + 1, "fill");
+
+		//FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 8000);
+		FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 800);
+		Difference(ho_DomainIm, (*ho_RegionISnoPhnoIsl), &(*ho_RegionInoPhnoIsl));
+		Difference((*ho_RegionISnoPhnoIsl), ho_RegionDifference3, &ho_RegionIsl);
+
+		Connection(ho_RegionPH, &ho_RegionsPHi);
+		Connection(ho_RegionIsl, &ho_RegionsIsli);
+
+		SelectShape(ho_RegionsPHi, &ho_RegionsPHii, "area", "and", hv_PHamin, 999999);
+		SelectShape(ho_RegionsPHii, &(*ho_RegionsPH), "inner_radius", "and", hv_PHrmin,
+			999999);
+
+		SelectShape(ho_RegionsIsli, &ho_RegionsIslii, "area", "and", hv_Islamin, 999999);
+		SelectShape(ho_RegionsIslii, &(*ho_RegionsIsl), "inner_radius", "and", hv_Islrmin,
+			999999);
+
+		hv_PHash = 200;
+		SelectShape(ho_RegionsPHii, &ho_RegionsPHiii, "area", "and", hv_PHash, 999999);
+		Union1(ho_RegionsPHiii, &ho_RegionPHiii);
+
+		/*Difference(*ho_RegionInoPhnoIsl, ho_RegionPHiii, &( *ho_RegionInoPhnoIsl));
+
+		SelectShape(ho_RegionsIsli, &ho_RegionsIslii, "area", "and", hv_Islamin, 999999);
+		SelectShape(ho_RegionsIslii, &(*ho_RegionsIsl), "inner_radius", "and", hv_Islrmin,
+			999999);*/
+
+
+		return;
+	}
+
+	void BuildIRBP8(HObject ho_SkeletonsFWM, HObject ho_RegionInoD, HObject ho_ImIRBP,
+		HObject ho_RegionsPNi, HObject ho_RegCut, HObject *ho_ImIRBPOut, HTuple hv_expsize,
+		HTuple hv_nEmpty, HTuple hv_dil, HTuple *hv_nFWMP)
+	{
+
+		// Local iconic variables
+		HObject  ho_SkeletonsFWMd, ho_RegionInoDS, ho_RecInoD;
+		HObject  ho_RegionsFWM, ho_RegionsFWMBi, ho_RegionsFWMB;
+		HObject  ho_Obj, ho_Skel, ho_Objs, ho_RegFWMB, ho_obj1, ho_objfu;
+		HObject  ho_RegionIntersection;
+
+		// Local control variables
+		HTuple  hv_no, hv_Row1, hv_Column1, hv_Row2, hv_Column2;
+		HTuple  hv_j, hv_nO, hv_jj, hv_a, hv_Row, hv_Column, hv_stseq;
+		HTuple  hv_overf, hv_SequenceINBi;
+
+		//**** BuildIRBP8
+		//**- 13.11.2025 - changed a lot
+		(*ho_ImIRBPOut) = ho_ImIRBP;
+		//* dif. is used to exclude points of SkeletonsFWMS from RegionsFWMS if necessary
+		//dilation_circle (SkeletonsFWM, SkeletonsFWMSd, 2.5)
+		//1+2
+		//dil := 5
+		DilationCircle(ho_SkeletonsFWM, &ho_SkeletonsFWMd, hv_dil);
+		CountObj(ho_SkeletonsFWMd, &hv_no);
+
+		//1
+		//difference (SkeletonsFWMSd, RegionInoDS, SkeletonsFWMSm)
+		//3
+		SmallestRectangle1(ho_RegionInoD, &hv_Row1, &hv_Column1, &hv_Row2, &hv_Column2);
+		GenRectangle1(&ho_RecInoD, hv_Row1 - 5, hv_Column1 - 5, hv_Row2 + 5, hv_Column2 + 5);
+		//difference (RecInoD, RegionInoDfwm, RegionInoDSfwm)
+		Difference(ho_RecInoD, ho_RegionInoD, &ho_RegionInoDS);
+		//expand_region (SkeletonsFWMd, RegionInoDS, RegionExpanded, 'maximal', 'image')
+		//intersection (RegionExpanded, RegionInoD, RegionsIntersection)
+		Intersection(ho_SkeletonsFWMd, ho_RegionInoD, &ho_RegionsFWM);
+		Boundary(ho_RegionsFWM, &ho_RegionsFWMBi, "inner");
+		CountObj(ho_RegionsFWMBi, &(*hv_nFWMP));
+		GenEmptyObj(&ho_RegionsFWMB);
+		{
+			HTuple end_val23 = (*hv_nFWMP);
+			HTuple step_val23 = 1;
+			for (hv_j = 1; hv_j.Continue(end_val23, step_val23); hv_j += step_val23)
+			{
+
+				SelectObj(ho_RegionsFWMBi, &ho_Obj, hv_j);
+
+				SelectObj(ho_SkeletonsFWM, &ho_Skel, hv_j);
+				Connection(ho_Obj, &ho_Objs);
+				CountObj(ho_Objs, &hv_nO);
+				GenEmptyObj(&ho_RegFWMB);
+				{
+					HTuple end_val31 = hv_nO;
+					HTuple step_val31 = 1;
+					for (hv_jj = 1; hv_jj.Continue(end_val31, step_val31); hv_jj += step_val31)
+					{
+						SelectObj(ho_Objs, &ho_obj1, hv_jj);
+						FillUp(ho_obj1, &ho_objfu);
+						Intersection(ho_objfu, ho_Skel, &ho_RegionIntersection);
+						AreaCenter(ho_RegionIntersection, &hv_a, &hv_Row, &hv_Column);
+						if (0 != (hv_a > 10))
+						{
+							Union2(ho_RegFWMB, ho_obj1, &ho_RegFWMB);
+						}
+					}
+				}
+				ConcatObj(ho_RegionsFWMB, ho_RegFWMB, &ho_RegionsFWMB);
+			}
+		}
+
+		hv_stseq = hv_nEmpty + 1;
+		hv_overf = 255 - hv_stseq;
+		TupleGenSequence(hv_stseq, ((*hv_nFWMP) + hv_stseq) - 1, 1, &hv_SequenceINBi);
+		//WriteObject(ho_RegionsFWMB, "C:\\TestContSaved\\ho_RegionsFWMB");
+		
+		PaintRegion(ho_RegionsFWM, (*ho_ImIRBPOut), &(*ho_ImIRBPOut), 1, "fill");
+		//WriteObject(ho_RegionsFWMBi, "C:\\TestContSaved\\ho_RegionsFWMBi");
+		PaintRegion(ho_RegionsFWMB, (*ho_ImIRBPOut), &(*ho_ImIRBPOut), hv_SequenceINBi,
+			"fill");
+		return;
+	}
 
 } // namespace

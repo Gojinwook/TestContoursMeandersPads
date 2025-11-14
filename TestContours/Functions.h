@@ -51,4 +51,10 @@ namespace Functions
 		HObject *ho_RegionIR, HObject *ho_RBEp, HTuple hv_ctype, HTuple hv_thr, HTuple hv_pdil);
 	void BuildRealContour(HObject ho_Im, HObject ho_Rectangle5, HObject *ho_ContourOut, HObject *ho_BorderEPs,
 		HObject *ho_RegionIR, HTuple hv_ctype, HTuple hv_thr);
+	void ThresholdPHIsp(HObject ho_Im, HObject ho_RegProc, HObject *ho_RegionsPH, HObject *ho_RegionsIsl,
+		HObject *ho_RegionISnoPhnoIsl, HObject *ho_RegionInoPhnoIsl, HObject *ho_RegionI,
+		HTuple hv_thr, HTuple hv_PHrmin, HTuple hv_PHamin, HTuple hv_Islrmin, HTuple hv_Islamin, HTuple hv_PHash, HObject *m_local_ImModified);
+	void BuildIRBP8(HObject ho_SkeletonsFWM, HObject ho_RegionInoD, HObject ho_ImIRBP,
+		HObject ho_RegionsPNi, HObject ho_RegCut, HObject *ho_ImIRBPOut, HTuple hv_expsize,
+		HTuple hv_nEmpty, HTuple hv_dil, HTuple *hv_nFWMP);
 }

@@ -119,6 +119,10 @@ BEGIN_MESSAGE_MAP(CTestContoursDlg, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT23, &CTestContoursDlg::OnEnChangeEdit23)
 	ON_EN_CHANGE(IDC_EDIT21, &CTestContoursDlg::OnEnChangeEdit21)
 	ON_BN_CLICKED(IDC_BUTTON19, &CTestContoursDlg::OnBnClickedButton19)
+	ON_BN_CLICKED(IDC_BUTTON21, &CTestContoursDlg::OnBnClickedButton21)
+	ON_BN_CLICKED(IDC_BUTTON22, &CTestContoursDlg::OnBnClickedButton22)
+	ON_EN_CHANGE(IDC_EDIT31, &CTestContoursDlg::OnEnChangeEdit31)
+	ON_EN_CHANGE(IDC_EDIT32, &CTestContoursDlg::OnEnChangeEdit32)
 END_MESSAGE_MAP()
 
 
@@ -189,6 +193,9 @@ BOOL CTestContoursDlg::OnInitDialog()
 	num = 1;
 	disp = 0;
 
+	m_hv_threshold = 155;
+	fwmw = 6;
+
 	CString cstr;
 	cstr.Format(_T("%d"), m_fsz);
 	SetDlgItemText(IDC_EDIT2, cstr);
@@ -221,6 +228,12 @@ BOOL CTestContoursDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT18, cstr);
 	cstr.Format(_T("%d"), m_fszwa);
 	SetDlgItemText(IDC_EDIT16, cstr);
+
+	cstr.Format(_T("%d"), m_hv_threshold.I());
+	SetDlgItemText(IDC_EDIT31, cstr);
+
+	cstr.Format(_T("%d"), fwmw);
+	SetDlgItemText(IDC_EDIT32, cstr);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -3384,4 +3397,351 @@ void CTestContoursDlg::OnBnClickedButton19()
 	cstr.Format(_T("(%d)"), (int)tnum);
 	SetDlgItemText(IDC_EDIT9, cstr);
 	printf("\n***ContoursGPadsCon.hobj and RegionsPadsCon.hobj read***");
+	
+
+}
+
+UINT16 *pImIRBP, *pImIRBS, *pImCLC, *pImCLCS;// image pointers
+UINT8 *pIm/*, *Empty*/;
+int m_iw, m_ih;
+CFWM* m_pFWM;
+float *pP1x, *pP1y, *pP2x, *pP2y, *pP3x, *pP3y, *pWi;
+int *pPnum, *pPnum2, *pWG;
+
+void CTestContoursDlg::OnBnClickedButton21()
+{
+	HTuple ht1, ht3, ht2, ht2a, ht;
+
+	m_hv_PHrmin = 2;
+	m_hv_PHamin = 10;
+	m_hv_Islrmin = 2;
+	m_hv_Islamin = 10;
+	HObject ho_local_ImModified;
+	CountSeconds(&ht1);
+	ThresholdPHIsp(
+		m_ho_Im, m_ho_RegProc,
+		&m_ho_RegionPH, &m_ho_RegionsIsl,
+		&m_ho_RegionISnoIslnoPh, &m_ho_RegionInoIslnoPh, &m_ho_RegionI,
+		m_hv_threshold, m_hv_PHrmin, m_hv_PHamin,
+		m_hv_Islrmin, m_hv_Islamin, 200, &ho_local_ImModified);
+
+	GetImageSize(m_ho_Im, &m_hv_Width, &m_hv_Height);
+	GenImageConst(&m_ho_ImIRBP, "uint2", m_hv_Width, m_hv_Height);
+	GenEmptyObj(&m_ho_RegionCut);
+	HTuple hv_expsize = 351;
+	HTuple hv_dil = 3;
+	HTuple hv_nEmpty = 0;
+	HTuple hv_nFWMP;
+	BuildIRBP8(m_ho_SkeletonsFWM, m_ho_RegionInoIslnoPh, m_ho_ImIRBP, m_ho_RegionsPNPi, m_ho_RegionCut,
+		&m_ho_ImIRBP,
+		hv_expsize,
+		hv_nEmpty, hv_dil,
+		&hv_nFWMP);
+	CountSeconds(&ht2);
+	
+	ht = ht2 - ht1;
+	double msec1 = ht.D()*1000.;
+
+	if (save == 1)
+	{
+		WriteImage(m_ho_ImIRBP, "tiff", 0, "C:\\TestContSaved\\m_ho_ImIRBP");
+		WriteObject(m_ho_SkeletonsFWM, "C:\\TestContSaved\\m_ho_SkeletonsFWM");
+		WriteObject(m_ho_RegionISnoIslnoPh, "C:\\TestContSaved\\m_ho_RegionISnoIslnoPh");
+		WriteObject(m_ho_RegionsPNPi, "C:\\TestContSaved\\m_ho_RegionsPNPi");
+		WriteObject(m_ho_RegionCut, "C:\\TestContSaved\\m_ho_RegionCut");
+		//WriteObject(m_ho_RegionISnoIslnoPh, "C:\\TestContSaved\\m_ho_RegionISnoIslnoPh");
+	}
+		
+	HTuple r51, c51, r52, c52, ww, wh, wcx, wcy;
+	HObject Rect1, ho_SkeletonFWM;
+	Union1(m_ho_SkeletonsFWM, &ho_SkeletonFWM);
+	SmallestRectangle1(ho_SkeletonFWM, &r51, &c51, &r52, &c52);
+	//GenRectangle1()
+	//SmallestRectangle1(ho_Rect, &r51, &c51, &r52, &c52);
+	ww = (c52 - c51);
+	wh = (r52 - r51);
+	HTuple ks, kx, ky;
+	kx = 1920. / ww;
+	ky = 1080. / wh;
+	TupleMin2(kx, ky, &ks);
+	if (ks > 8.)
+		ks = 8.;
+	TupleInt(ww * ks, &ww);
+	TupleInt(wh * ks, &wh);
+	//wh = wh * ks;
+
+	wcy = r51 + wh / 2;
+	wcx = c51 + ww / 2;
+	//hWindow.MoveRectangle();
+	hWindow.OpenWindow(0, WINST, ww, wh, 0, "visible", "");
+	hWindow.SetPart((Hlong)r51, (Hlong)c51, (Hlong)r52, (Hlong)c52);
+	/*HTuple W, H, srow, scol;
+	GetImageSize(m_ho_Im, &W, &H);*/
+
+	//HTuple ks, kx, ky;
+	//kx = 1920. / W;
+	//ky = 1080. / H;
+	//TupleMin2(kx, ky, &ks);
+	/////*if (ks > 8)
+	////	ks = 8;*/
+	//TupleInt(W * ks*0.9, &W);
+	//TupleInt(H * ks*0.9, &H);
+	//if (hWindow.IsHandleValid())
+	//	hWindow.CloseWindow();
+
+	//hWindow.OpenWindow(0, WINST, W, H, 0, "visible", "");
+	hWindow.DispImage(m_ho_ImIRBP);
+	//hWindow.Click();
+	HTuple tl, h, w, t, hiptr, hiptrIRB, hiptrCLC;
+	HTuple hv_DistNmin, hv_DistNmax;
+	DWORD time_start = GetTickCount();
+
+	GetImagePointer1(m_ho_ImCLC, &hiptrCLC, &t, &w, &h);
+	GetImagePointer1(m_ho_ImIRBP, &hiptrIRB, &t, &w, &h);
+	GetImagePointer1(m_ho_Im, &hiptr, &t, &w, &h);
+	pImCLC = (UINT16 *)(Hlong *)hiptrCLC.L();
+	m_pFWM->pImIRBP = (UINT16 *)(Hlong *)hiptrIRB.L();
+	pIm = (UINT8 *)(Hlong *)hiptr.L();
+	m_iw = (int)w.L();
+	m_ih = (int)h.L();
+	float threshold = (float)m_hv_threshold.I();
+	int dclcmax = 10;
+	//int Np = 100;
+	CountSeconds(&ht2a);
+	//	FWM_BR_CPU_LaunchN(mmpIm, mmpImIRB, mmpImIRBS, mmpImCLC, iw, ih, 0, mmNp, mmthr, 0, mmpP1x, mmpP1y, mmpP2x, mmpP2y, mmpPnum, mmpWidth, mmpWmin, mmpPInt1x, mmpPInt1y, mmpPInt2x, mmpPInt2y, mmpShift, mmpPuseint);
+	m_pFWM->CPU_MSPtProc50(pIm, m_pFWM->pImIRBP, pImCLC, m_iw, m_ih, 0, Np,
+		threshold, dclcmax,
+		pP1x, pP1y, pP2x, pP2y, pPnum, pPnum2,
+		m_pFWM->pWidth, m_pFWM->pWmin, m_pFWM->pPInt1x, m_pFWM->pPInt1y, m_pFWM->pPInt2x, m_pFWM->pPInt2y, m_pFWM->pShift, m_pFWM->pPuseint);
+	CountSeconds(&ht3);
+	ht = ht3 - ht2a;
+	double msec2 = ht.D()*1000.;
+
+	int sz1 = 15;
+	float prcMB = 70.;
+	float prcSP = 50.;
+	float absMB = 3.;
+	float minwp = 4.;
+	float narrowwp = 0.7;
+	float widewp = 10.;
+
+	float stdwidth = 4.;
+	float absSP = 3.;
+	int dlen = 1.;
+	m_pFWM->FWM_PostProcCPUNew2(m_pFWM->pWidth, pWG, m_pFWM->pmedo, m_pFWM->pPInt1x, m_pFWM->pPInt1y,/*pP3x, pP3y,*/ NaC, Np,
+		pPaddrC,
+		sz1,
+		0,
+		prcMB,
+		prcSP,
+		absMB,
+		minwp,
+		narrowwp,
+		widewp,
+		stdwidth,
+		absSP,
+		dlen,
+		m_pFWM->pDefMB,
+		m_pFWM->pDefMBprc,
+		m_pFWM->pXdefMB,
+		m_pFWM->pYdefMB,
+		m_pFWM->pDefSP,
+		m_pFWM->pDefSPprc,
+		m_pFWM->pXdefSP,
+		m_pFWM->pYdefSP,
+
+		&m_pFWM->MBnum, &m_pFWM->SPnum);
+
+	CountSeconds(&ht4);
+	ht = ht4 - ht3;
+	double msec3 = ht.D()*1000.;
+	// -------------------------------------------------------------------
+
+	
+		HTuple PMBx_tuple;
+		HTuple PMBy_tuple;
+		FloatToTuple(m_pFWM->pXdefMB, m_pFWM->MBnum, PMBx_tuple);
+		FloatToTuple(m_pFWM->pYdefMB, m_pFWM->MBnum, PMBy_tuple);
+
+		GenEmptyObj(&m_ho_RegionsMB);
+		//HTuple  hv_nMB = HTuple(m_pFWM->MBnum);
+		TupleSelectMask(PMBy_tuple, PMBy_tuple, &PMBy_tuple);
+		TupleSelectMask(PMBx_tuple, PMBx_tuple, &PMBx_tuple);
+		HTuple  hv_nMB;
+		TupleLength(PMBx_tuple, &hv_nMB);
+		if (hv_nMB > 0)
+		{
+			HTuple hv_TR;
+			TupleGenConst(hv_nMB, 8, &hv_TR);
+			GenCircle(&m_ho_RegionsMB, PMBy_tuple, PMBx_tuple, hv_TR);
+		}
+
+	
+
+	// -------------------------------------------------------------------
+	
+		HTuple PSPx_tuple;
+		HTuple PSPy_tuple;
+		FloatToTuple(m_pFWM->pXdefSP, m_pFWM->SPnum, PSPx_tuple);
+		FloatToTuple(m_pFWM->pYdefSP, m_pFWM->SPnum, PSPy_tuple);
+
+		GenEmptyObj(&m_ho_RegionsSP);
+		//HTuple  hv_nSP = HTuple(m_pFWM->SPnum);
+		TupleSelectMask(PSPy_tuple, PSPy_tuple, &PSPy_tuple);
+		TupleSelectMask(PSPx_tuple, PSPx_tuple, &PSPx_tuple);
+		HTuple  hv_nSP;
+		TupleLength(PSPx_tuple, &hv_nSP);
+
+
+
+		if (hv_nSP > 0)
+		{
+			HTuple hv_TR;
+			TupleGenConst(hv_nSP, 7, &hv_TR);
+			//DistancePr(m_ho_RegNoProc, PSPy_tuple, PSPx_tuple, &hv_DistNmin, &hv_DistNmax);
+			GenCircle(&m_ho_RegionsSP, PSPy_tuple, PSPx_tuple, hv_TR);
+
+		}
+		CountSeconds(&ht5);
+	printf("\n*** FWM Performed \n***");
+	double msec = msec1 + msec2 + msec3;
+	printf("\n***FWM cycle ended (%d)points-->%0.2f(Total) = %.2f(IRB) + %.2f(Proc.) + %.2f(Post.)  msec***", num, msec, msec1, msec2, msec3);
+
+	hWindow.DispImage(m_ho_Im);
+	hWindow.SetDraw("margin");
+	hWindow.SetColor("blue");
+	hWindow.DispRegion(m_ho_RegionsMB);
+	hWindow.SetColor("red");
+	hWindow.DispRegion(m_ho_RegionsSP);
+	int MBnum = hv_nMB.I();
+	int SPnum = hv_nSP.I();
+	hWindow.DispText((MBnum), "window", 10, 10, "blue", "box", "true");
+	hWindow.DispText((SPnum), "window", 30, 10, "red", "box", "true");
+
+		//DispRegion(m_ho_RegionsSP);
+	
+	HTuple PWidthP_tuple((float*)m_pFWM->pWidth, Np * 1);
+	if (save == 1)
+	{
+		WriteObject(m_ho_RegionsMB, "C:\\TestContSaved\\m_ho_RegionsMB");
+		WriteObject(m_ho_RegionsSP, "C:\\TestContSaved\\m_ho_RegionsSP");
+		
+		WriteTuple(PWidthP_tuple, "C:\\TestContSaved\\PWidthP_tuple.tup");
+	}
+	
+
+	int caddrb, caddre, cnum;
+	/*int nc, cbeg, ncont;
+	nc = *(pCinRnum + fwmw - 1);
+	cbeg = PcontR[fwmw - 1];
+	ncont = cbeg + k;*/
+	caddrb = *(pPaddrR + fwmw -1);
+	caddre = *(pPaddrR + fwmw ) - 1;
+	cnum = (caddre - caddrb);
+	HTuple h_Width, hbeg;
+	TupleSelectRange(PWidthP_tuple, (HTuple)caddrb, (HTuple)caddre, &h_Width);
+	WriteTuple(h_Width, "C:\\TestContSaved\\h_Width.tup");
+}
+
+int *ConvertTupleToInt(HTuple T)
+{
+	int *iptr, id;
+	Hlong *hlptr;
+	//float f;
+	HTuple tl;
+	int *ip;
+
+	TupleLength(T, &tl);
+	int itl = tl.L();
+
+	hlptr = T.ToLArr();
+	//iptr = hv_tst.ToIArr();
+	ip = (int *)malloc(itl * sizeof(int));
+	for (int i = 0; i < itl; i++)
+	{
+		id = (int)*(hlptr + i);
+		*(ip + i) = id;
+	}
+	return ip;
+}
+
+void CTestContoursDlg::OnBnClickedButton22()
+{
+	m_hv_pathModel = "D:\\FC-BGA\\a03-a87-a0-aoi_LayerL1-0200\\a03-a87-a0-aoi-l4p\\Model\\Teach\\";
+	HObject ho_Domain;
+	HTuple pathModel=m_hv_pathModel, pathModelTuple;
+	ReadImage(&m_ho_Im, pathModel+"Ima.tif");
+	ReadImage(&m_ho_Gi, pathModel + "Gi.tif");
+	ReadImage(&m_ho_ImCLC, pathModel + "ImCLC.tif");
+	
+	ReadObject(&m_ho_RegNoProc, pathModel + "RegNoProc");
+
+	ReadObject(&m_ho_SkeletonsFWM, pathModel + "SkeletonsFWM");
+	ReadObject(&m_ho_RegionsPNPi, pathModel + "RegionsPNPi");
+	GetDomain(m_ho_Gi, &ho_Domain);
+	Difference(ho_Domain, m_ho_RegNoProc, &m_ho_RegProc);
+	printf("***Image Files and FWM objects are read***\n");
+	HTuple tl;
+	int v;
+	HTuple dir;
+	//dir = "\\PATTERN\\NT3\\";
+	//dir = hp.hv_path;
+	//   for FWM
+	pathModelTuple = pathModel + "Tuple\\";
+	ReadTuple(pathModelTuple + "PaddrC.tup", &hv_PaddrC);
+	pPaddrC = ConvertTupleToInt(hv_PaddrC);
+	TupleLength(hv_PaddrC, &tl);
+	NaC = tl.L();
+
+	ReadTuple(pathModelTuple + "PaddrR.tup", &hv_PaddrR);
+	pPaddrR = ConvertTupleToInt(hv_PaddrR);
+	ReadTuple(pathModelTuple + "Pnum.tup", &hv_Pnum);
+	pPnum = ConvertTupleToInt(hv_Pnum);
+	ReadTuple(pathModelTuple + "Pnum2.tup", &hv_Pnum2);
+	pPnum2 = ConvertTupleToInt(hv_Pnum2);
+	ReadTuple(pathModelTuple + "X1.tup", &hv_P1x);
+	TupleLength(hv_P1x, &tl);
+	Np = tl.L();
+
+	pP1x = ConvertTupleToFloat(hv_P1x);
+	ReadTuple(pathModelTuple + "Y1.tup", &hv_P1y);
+	pP1y = ConvertTupleToFloat(hv_P1y);
+	ReadTuple(pathModelTuple + "X2.tup", &hv_P2x);
+	pP2x = ConvertTupleToFloat(hv_P2x);
+	ReadTuple(pathModelTuple + "Y2.tup", &hv_P2y);
+	pP2y = ConvertTupleToFloat(hv_P2y);
+	ReadTuple(pathModelTuple + "XC.tup", &hv_P3x);
+	pP3x = ConvertTupleToFloat(hv_P3x);
+	ReadTuple(pathModelTuple + "YC.tup", &hv_P3y);
+	TupleMin(hv_P3y, &tl);
+	pP3y = ConvertTupleToFloat(hv_P3y);
+	/*for (int i = 0; i < NaC; i++)
+		if (v = *(pP3y + i) < 0)
+			i = i;*/
+	ReadTuple(pathModelTuple + "WG.tup", &hv_WG);
+	pWG = ConvertTupleToInt(hv_WG);
+
+	ReadTuple(pathModelTuple + "PuseintP.tup", &hv_Puseint);
+	pPuseint = ConvertTupleToInt(hv_Puseint);
+	printf("*** FWM MSs read, parts=%d, points=%d ***\n", NaC, Np);
+
+	m_pFWM = new CFWM();
+	m_pFWM->Alloc2f(Np);
+	printf("*** FWM class created ***\n");
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit31()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT31, cstr);
+	m_hv_threshold =(int) _tstof(cstr);
+}
+
+
+void CTestContoursDlg::OnEnChangeEdit32()
+{
+	CString cstr;
+	GetDlgItemText(IDC_EDIT32, cstr);
+	fwmw = (int)_tstof(cstr);
 }
