@@ -57,4 +57,7 @@ namespace Functions
 	void BuildIRBP8(HObject ho_SkeletonsFWM, HObject ho_RegionInoD, HObject ho_ImIRBP,
 		HObject ho_RegionsPNi, HObject ho_RegCut, HObject *ho_ImIRBPOut, HTuple hv_expsize,
 		HTuple hv_nEmpty, HTuple hv_dil, HTuple *hv_nFWMP);
+	void BuildIRBP9(HObject ho_SkeletonsFWM, HObject ho_RegionInoD, HObject ho_ImIRBP,
+		HObject ho_RegionsPNi, HObject ho_RegCut, HObject *ho_ImIRBPOut, HTuple hv_expsize,
+		HTuple hv_nEmpty, HTuple hv_dil, HTuple *hv_nFWMP);
 }

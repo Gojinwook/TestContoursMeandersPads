@@ -140,6 +140,8 @@ public:
 		float *pDefMBa, float *pDefMBprc, float *pXdefMB, float *pYdefMB, float *pDefSPa, float *pDefSPprc, float *pXdefSP, float *pYdefSP, int *MBnum, int *SPnum);
 	void FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, float *pYC, int nC, int n, int *pPaddr, int sz1, int skip, float mprc, float sprc, float mabs, float minwp, float narpwidth, float widepwidth, float stdgpwidth, float pabs, int dlen,
 		float *pDefMBa, float *pDefMBprc, float *pXdefMB, float *pYdefMB, float *pDefSPa, float *pDefSPprc, float *pXdefSP, float *pYdefSP, int *MBnum, int *SPnum);
+	void FWM_PostProcCPUNew21(float *pw, int *pwg, float *medo, float *pXC, float *pYC, int nC, int n, int *pPaddr, int sz1, int skip, float mprc, float sprc, float mabs, float minwp, float narpwidth, float widepwidth, float stdgpwidth, float pabs, int dlen,
+		float *pDefMBa, float *pDefMBprc, float *pXdefMB, float *pYdefMB, float *pDefSPa, float *pDefSPprc, float *pXdefSP, float *pYdefSP, int *MBnum, int *SPnum);
 
 	void FWM_PostProcCPU_2C(float *pw, int *pwg, float *medo, float *pXC, float *pYC, int nC, int n, int *pPaddr, int sz1, int skip, float mprc, float sprc, float mabs, float minwp, float narpwidth, float widepwidth, float stdgpwidth, float pabs, int dlen,
 		float *pDefMBa, float *pDefMBprc, float *pXdefMB, float *pYdefMB, float *pDefSPa, float *pDefSPprc, float *pXdefSP, float *pYdefSP, int *dPuseint, int *MBnum, int *SPnum);

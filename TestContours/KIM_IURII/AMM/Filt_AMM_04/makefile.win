@@ -1,0 +1,203 @@
+#-----------------------------------------------------------------------------
+# Makefile for HALCON example extension package "halconuser" (Windows)
+#-----------------------------------------------------------------------------
+# Copyright (c) 1996-2018 MVTec Software GmbH, www.mvtec.com
+#-----------------------------------------------------------------------------
+# This makefile compiles the source code for new user-defined HALCON operators
+# and generates new user extension libs/DLLs.
+#
+# After generating the user extension libs/DLLs you can use the new operators
+# just as the inbuilt HALCON system operators. You can compile some
+# exemplary test applications via the targets 'app' and 'app_dotnet' to see
+# the new operators in action.
+#
+# ATTENTION: - This makefile uses nmake syntax and works only with nmake,
+#              therefore.
+#            - Do not forget to set HALCONEXTENSIONS to the directory
+#              halconuser in order to use the package during a HALCON session.
+#
+#-----------------------------------------------------------------------------
+#
+# In order to adapt this makefile to other user extensions, change the
+# following:
+#   - the variable PACKAGE_NAME (name of the user extension libs/DLLs)
+#   - the variable XPKG_DEFS (description files for the new operators)
+#   - the variable XPKG_OBJS (operator implementation object files)
+#   - for an application program see according APPLICATION_* macros
+#
+#-----------------------------------------------------------------------------
+#
+# Build targets:
+#  all: (default) builds extension package interfaces for HALCON and HALCON XL
+#       for following language interfaces: HDEV, C, CPP.
+#  dotnet: builds the dotnet interface of the extension package.
+#  app: builds the test example programs using the extension package.
+#  app_dotnet: builds the .NET test example program
+#  clean: removes the builds of the extension package for HALCON and HALCON XL
+#  clean_all: removes the build of the extension package and the applications.
+#  cpp10: builds legacy CPP interface (CPP10).
+#
+#-----------------------------------------------------------------------------
+# -- common stuff ------------------------------------------------------------
+
+VC2017DIR = C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\VC\Tools\MSVC\14.16.27023\bin\Hostx64\x64
+
+!ifndef BASE_DIR
+BASE_DIR       = .\ #
+!endif
+!ifndef MAKE_DIR
+MAKE_DIR       = $(BASE_DIR) #
+!endif
+MAKE_FILE      = makefile.win
+
+MKDIR          = mkdir
+RM             = del
+CP             = copy
+MAKE           = "$(VC2017DIR)\nmake"
+SL             = \ #
+EMPTY          =
+
+!ifndef STATE
+STATE          =release
+!endif
+!ifdef XL
+XL  = 0
+!endif
+!if "$(XL)" == "yes" || "$(XL)" == "1"
+HSUFFIX        = xl
+CFLAGS_XL      = /DHC_LARGE_IMAGES
+CSCFLAGS_XL    = /define:HC_LARGE_IMAGES
+!endif
+
+!include "$(MAKE_DIR)common.mak"
+
+
+# -- platform specific stuff --------------------------------------------------
+
+PLATFORM            = $(HALCONARCH:-win32=)
+PLATFORM            = $(PLATFORM:-win64=)
+
+CC             = "$(VC2017DIR)\cl"
+CCC            = "$(VC2017DIR)\cl"
+LD             = link
+
+CSC            = csc
+RESGEN         = resgen
+
+EXE            = .exe
+O              = obj
+OUT_FLAG       = /Fo
+AR_EXT         = dll
+AR_PREFIX      =
+AR_DIR         = $(BIN_DIR)
+AR_OUT         = /out:
+MIDL           = midl
+RC             = "$(VC2017DIR)\rc"
+
+HCINCLUDES     = /I"$(H_INCLUDE)"
+HCPPINCLUDES   = /I"$(H_INCLUDE)" /I"$(H_INCLUDE_CPP)"
+HCPP10INCLUDES = /I"$(H_INCLUDE)" /I"$(H_INCLUDE_CPP10)"
+
+!if "$(PLATFORM)" == "x64"
+CFLAGS_PLATFORM = /DWIN32 /DWIN64
+LFLAGS_PLATFORM = /machine:amd64
+ATLSLIB         = atls.lib
+ODBC32LIB      =
+ODBCPP32LIB    =
+!else
+!if "$(STATE)" == "release"
+CFLAGS_PLATFORM = /DWIN32 /Oty /Gs /O2ib2 /arch:SSE2
+!else
+CFLAGS_PLATFORM = /DWIN32
+!endif
+LFLAGS_PLATFORM = /machine:ix86
+ATLSLIB        = atls.lib
+#ODBC32LIB      = odbc32.lib
+#ODBCPP32LIB    = odbccp32.lib
+!endif
+
+
+!if "$(STATE)" == "release"
+CFLAGS         = /MT /O2 /EHsc /DH_PARALLEL $(CFLAGS_XL) $(CFLAGS_PLATFORM) /I$(XPKG_INC)
+CONF_SUFFIX    =
+LFLAGS         = /nologo /incremental:no $(LFLAGS_PLATFORM)
+!else # debug
+CFLAGS         = /MT /Zi /EHsc /DH_PARALLEL $(CFLAGS_XL) $(CFLAGS_PLATFORM) /I$(XPKG_INC)
+CONF_SUFFIX    =
+LFLAGS         = /debug /debugtype:cv  /nologo /incremental:no $(LFLAGS_PLATFORM)
+!endif
+
+LFLAGS_SH      = /dll
+XPKG_LIB       = $(LIB_DIR)/$(XPKG_LIB_NAME).lib
+
+H_CLIBS        = "$(H_LIB)$(SL)halconc$(HSUFFIX).lib" \
+                 "$(H_LIB)$(SL)halcon$(HSUFFIX).lib"
+H_CPPLIBS      = "$(H_LIB)$(SL)halconcpp$(HSUFFIX).lib" \
+                 "$(H_LIB)$(SL)halcon$(HSUFFIX).lib"
+
+
+EXTRA_LFLAGS_LIB     = /implib:$(LIB_DIR)$(SL)$(XPKG_LIB_NAME).lib \
+                         "$(H_LIB)$(SL)halcon$(HSUFFIX).lib" \
+			 $(H_CLIBS) \
+			 $(H_CPPLIBS) \
+                         kernel32.lib user32.lib gdi32.lib \
+                         winspool.lib comdlg32.lib advapi32.lib shell32.lib \
+                         ole32.lib oleaut32.lib uuid.lib $(ODBC32LIB) \
+												 $(ODBCCP32LIB)
+EXTRA_LFLAGS_C_LIB   = /implib:lib$(SL)$(HALCONARCH)$(SL)$(XPKG_LIB_C_NAME).lib \
+                         $(H_CLIBS) \
+			 $(H_CPPLIBS) \
+												 kernel32.lib user32.lib gdi32.lib \
+                         winspool.lib comdlg32.lib advapi32.lib shell32.lib \
+                         ole32.lib oleaut32.lib uuid.lib $(ODBC32LIB) \
+												 $(ODBCCP32LIB)
+EXTRA_LFLAGS_CPP_LIB = /implib:lib$(SL)$(HALCONARCH)$(SL)$(XPKG_LIB_CPP_NAME).lib \
+                         $(H_CPPLIBS) \
+                         kernel32.lib user32.lib \
+                         gdi32.lib winspool.lib comdlg32.lib advapi32.lib \
+                         shell32.lib ole32.lib oleaut32.lib uuid.lib \
+												 $(ODBC32LIB) $(ODBCCP32LIB)
+EXTRA_LFLAGS_CPP10_LIB = /implib:lib$(SL)$(HALCONARCH)$(SL)$(XPKG_LIB_CPP10_NAME).lib \
+                         "$(H_LIB)$(SL)halconcpp10$(HSUFFIX).lib" \
+                         "$(H_LIB)$(SL)halcon$(HSUFFIX).lib" \
+                         kernel32.lib user32.lib \
+                         gdi32.lib winspool.lib comdlg32.lib advapi32.lib \
+                         shell32.lib ole32.lib oleaut32.lib uuid.lib \
+												 $(ODBC32LIB) $(ODBCCP32LIB)
+
+#-----------------------------------------------------------------------------
+!include "$(MAKE_DIR)rules.mak"
+
+
+#-----------------------------------------------------------------------------
+
+# Defines for building .NET targets
+
+!include make.dotnet
+
+CSC_FLAGS     = $(CSC_FLAGS) $(CSCFLAGS_XL) $(CSC_FLAGS_WARN)
+
+!if "$(STATE)" == "release"
+CSC_FLAGS     = $(CSC_FLAGS)    $(CSC_FLAGS_OPTIMIZE)
+!else
+CSC_FLAGS     = $(CSC_FLAGS)    $(CSC_FLAGS_DEBUG)
+!endif
+
+!if "$(HALCONARCH)" > "x86"
+CSC_FLAGS     = $(CSC_FLAGS)    $(CSC_FLAGS_x86)
+!endif
+
+#-----------------------------------------------------------------------------
+
+#Rules for building .NET targets
+
+$(XPKG_LIB_DOTNET): $(LIB_DIR_DOTNET) $(XPKG_SRC)/HDOTNET$(PACKAGE_NAME).cs
+	$(CSC) /target:library /out:$(XPKG_LIB_DOTNET) \
+	    $(XPKG_SRC)$(SL)HDOTNET$(PACKAGE_NAME).cs  \
+	    /doc:$(LIB_DIR_DOTNET)$(SL)$(XPKG_LIB_DOTNET_NAME).xml $(CSC_FLAGS)
+
+
+$(APPLICATION_DOTNET): $(XPKG_SRC)$(SL)$(APPLICATION_DOTNET_NAME).cs "$(H_DOTNET)$(SL)halcondotnet$(HSUFFIX).dll"
+	$(CSC) /target:exe /out:$(APPLICATION_DOTNET) $(XPKG_SRC)$(SL)$(APPLICATION_DOTNET_NAME).cs \
+	  $(CSC_FLAGS) -r:$(BIN_DIR_DOTNET)$(SL)$(PACKAGE_NAME)dotnet$(HSUFFIX).dll
+	copy "$(H_DOTNET)$(SL)halcondotnet$(HSUFFIX).dll" $(BIN_DIR_DOTNET)

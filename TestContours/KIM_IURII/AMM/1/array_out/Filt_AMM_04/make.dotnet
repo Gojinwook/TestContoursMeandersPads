@@ -1,0 +1,15 @@
+#-----------------------------------------------------------------------------
+# Architecture-independent defines for building C# sources using HALCON/.NET
+#-----------------------------------------------------------------------------
+# Copyright (c) 2006-2018 MVTec Software GmbH, www.mvtec.com
+#-----------------------------------------------------------------------------
+
+#CSC Compiler Flags
+
+CSC_FLAGS     = /noconfig /r:System.dll /r:"$(H_DOTNET)$(SL)halcondotnet$(HSUFFIX).dll" /define:H_PARALLEL
+
+CSC_FLAGS_OPTIMIZE  = /optimize
+CSC_FLAGS_DEBUG     = /debug /define:DEBUG
+CSC_FLAGS_WARN      = /warn:3 /warnaserror
+CSC_FLAGS_WARN_MONO = /warn:1
+CSC_FLAGS_x86       = /platform:x86

@@ -1016,7 +1016,7 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 	{
 		ib = 0;
 		ie = 0;
-		if (cIdx == 8597)
+		if (cIdx == 290856)
 			cIdx = cIdx;
 		memcpy(&PIntX[0], &M1[0], 16 * sizeof(float));
 		memcpy(&PIntY[0], &M1[0], 16 * sizeof(float));
@@ -1087,7 +1087,7 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 			xc = PPx[i]; yc = PPy[i];
 			v = Pval[i];
 			
-			if (v == pnum || v == pnum2)
+			if (v == pnum /*|| v == pnum2*/)
 			{
 				Ipnum[npnum] = i;
 				PInti[npnum] = i;
@@ -1115,69 +1115,85 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 		}
 		else if (intnum == 1)
 		{
-			vp = Pval[Ipnum[0] - 1];
-			vn = Pval[Ipnum[0] + 1];
-			if (vp == 1)
+			if (Ipnum[0] == 0 || Ipnum[0] == pind - 1)
 			{
-				PIntY[1] = PPy[Ipnum[0]];
-				PIntX[1] = PPx[Ipnum[0]];
-				PInti[1] = Ipnum[0];
-				PIntY[0] = PPy[0];
-				PIntX[0] = PPx[0];
-				PInti[0] = 0;
-				wmax = sqrt((PIntX[0] - PIntX[1])*(PIntX[0] - PIntX[1]) + (PIntY[0] - PIntY[1])*(PIntY[0] - PIntY[1]));
+				wmax = pind;
 				wmin = wmax;
 				//return()
 			}
-			if (vn == 1)
+			else 
 			{
-				PIntY[0]  = PPy[Ipnum[0]];
-				PIntX[0]  = PPx[Ipnum[0]];
-				PInti[0]  = Ipnum[0];
-				PIntY[1]  = PPy[pind - 1];
-				PIntX[1]  = PPx[pind - 1];
-				PInti[1]  = pind - 1;
-				wmax = sqrt((PIntX[0] - PIntX[1])*(PIntX[0] - PIntX[1]) + (PIntY[0] - PIntY[1])*(PIntY[0] - PIntY[1]));
-				wmin = wmax;
-			//return()
-			}	
-			i = PInti[0];
-			g = *(pIm + PPy[i] * imw + PPx[i]);
-			//GetGrayval(Im, PPy[i], PPx[i], g);
-			j = 0;
 
-			ga[1]  = g;
-			if (PInti[j] > 0)
-			{	//get_grayval(Im, PPy[i - 1], PPx[i - 1], g);
-				g = *(pIm + PPy[i - 1] * imw + PPx[i - 1]);
-				ga[0] = g;
-			}
-			else
-				ga[0]  = ga[1];
 			
-			if (PInti[j] < pind - 1)
-			{
-				g = *(pIm + PPy[i + 1] * imw + PPx[i + 1]);
-				//get_grayval(Im, PPy[i + 1], PPx[i + 1], g);
-				ga[2] = g;
-			}
-			else
-				ga[2] = ga[1];
+				vp = Pval[Ipnum[0] - 1];
+				vn = Pval[Ipnum[0] + 1];
+				if (vp == 1)
+				{
+					PIntY[1] = PPy[Ipnum[0]];
+					PIntX[1] = PPx[Ipnum[0]];
+					PInti[1] = Ipnum[0];
+					PIntY[0] = PPy[0];
+					PIntX[0] = PPx[0];
+					PInti[0] = 0;
+					wmax = sqrt((PIntX[0] - PIntX[1])*(PIntX[0] - PIntX[1]) + (PIntY[0] - PIntY[1])*(PIntY[0] - PIntY[1]));
+					wmin = wmax;
+					//return()
+				}
+				else if (vn == 1)
+				{
+					PIntY[0]  = PPy[Ipnum[0]];
+					PIntX[0]  = PPx[Ipnum[0]];
+					PInti[0]  = Ipnum[0];
+					PIntY[1]  = PPy[pind - 1];
+					PIntX[1]  = PPx[pind - 1];
+					PInti[1]  = pind - 1;
+					wmax = sqrt((PIntX[0] - PIntX[1])*(PIntX[0] - PIntX[1]) + (PIntY[0] - PIntY[1])*(PIntY[0] - PIntY[1]));
+					wmin = wmax;
+				//return()
+				}	
+				else 
+				{
 
-			if (i < pind - 1 && i>0)
-			{ //SubPixCrdP(ga, PInti[j], PPx, PPy, &fIntX, &fIntY, thr);
-					SubPixCrdPe(ga, i, PPx, PPy,  &fIntX2[0], &fIntY2[0], thr, &err);
-			}
-			/*if (err == 1)
-			{*/
-				wmax = sqrt((fIntX2[0] - fIntX2[1])*(fIntX2[0] - fIntX2[1]) + (fIntY2[0] - fIntY2[1])*(fIntY2[0] - fIntY2[1]));
-				wmin = wmax;
-			//}
+				
+					i = PInti[0];
+					g = *(pIm + PPy[i] * imw + PPx[i]);
+					//GetGrayval(Im, PPy[i], PPx[i], g);
+					j = 0;
 
-				shift  = 0.0;
-			//return ;
-		jSPup = 1;
-		jSPdn = 0;
+					ga[1]  = g;
+					if (PInti[j] > 0)
+					{	//get_grayval(Im, PPy[i - 1], PPx[i - 1], g);
+						g = *(pIm + PPy[i - 1] * imw + PPx[i - 1]);
+						ga[0] = g;
+					}
+					else
+						ga[0]  = ga[1];
+			
+					if (PInti[j] < pind - 1)
+					{
+						g = *(pIm + PPy[i + 1] * imw + PPx[i + 1]);
+						//get_grayval(Im, PPy[i + 1], PPx[i + 1], g);
+						ga[2] = g;
+					}
+					else
+						ga[2] = ga[1];
+
+					if (i < pind - 1 && i>0)
+					{ //SubPixCrdP(ga, PInti[j], PPx, PPy, &fIntX, &fIntY, thr);
+							SubPixCrdPe(ga, i, PPx, PPy,  &fIntX2[0], &fIntY2[0], thr, &err);
+					}
+					/*if (err == 1)
+					{*/
+						wmax = sqrt((fIntX2[0] - fIntX2[1])*(fIntX2[0] - fIntX2[1]) + (fIntY2[0] - fIntY2[1])*(fIntY2[0] - fIntY2[1]));
+						wmin = wmax;
+					//}
+
+						shift  = 0.0;
+					//return ;
+					jSPup = 1;
+					jSPdn = 0;
+				}
+			}
 		}
 		else  ///**** NORMAL CASE ******
 		{
@@ -1269,7 +1285,9 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 			int2y = iyc;
 		}
 
-
+		
+		if(wmax>500)
+			wmax = wmax;
 		*(dW + cIdx) = wmax;
 		*(dWmin + cIdx) = wmin;
 		*(dShift + cIdx) = shift;
@@ -4233,6 +4251,211 @@ void CFWM::FWM_PostProcCPUNew(float *pw, int *pwg, float *medo, float *pXC, floa
 #define FWM_SP_ABS2	32
 #define FWM_SP_PRC2	64
 
+void CFWM::FWM_PostProcCPUNew21(float *pw, int *pwg, float *medo, float *pXC, float *pYC, int nc, int n, int *pPaddr, int sz1, int skip,
+	float mprc, float sprc, float mabs, float minthp, float narpwidth, float widepwidth, float stdgpwidth, float pabs, int dlen,
+	float *pDefMB, float *pDefMBprc, float *pXdefMB, float *pYdefMB, float *pDefSP, float *pDefSPprc, float *pXdefSP, float *pYdefSP, int *MBnum, int *SPnum)
+{	/// processing of single seleton part of length=n, RMed window=sz1
+	/// mode==0  - not using CAD width
+
+	int j;
+	int spnum = 0, mbnum = 0;
+	//	float *medo;
+	int bw = min(sz1, n);
+	int wgmed;
+	//int *pbuf;
+
+	float prcG, prcReal;
+
+	float w, wg, wn;
+	float dg, dgprc; // deviation from CAD
+	float dn, dnprc; // deviation from neighbor
+	float def, defprc; // defect size
+	int tdef; // defect type
+
+	float defspmax = 0., defspspprcmax = 0., defspspsum = 0;  /// for % sp
+	int defspspact = 0, defspspcnt = 0;
+
+	float defspmbmax = 0., defspmbprcmax = 0., defspmbsum = 0;  /// for % mb
+	int defspmbact = 0, defspmbcnt = 0;
+
+	int deftype, defin;
+	float defx, defy;
+
+	float defw; // defect width
+	float wnorm;
+
+	/*float defaspmax = 0., defaspprcmax = 0., defaspsum = 0;  /// for abs. sp
+	int defaspact = 0, defaspcnt = 0;
+
+	float defpspmax = 0., defpspprcmax = 0., defpspsum = 0;  /// for % sp
+	int defpspact = 0, defpspcnt = 0;
+
+	float defpmbmax = 0., defpmbprcmax = 0., defpmbsum = 0;  /// for % mb
+	int defpmbact = 0, defpmbcnt = 0;
+
+	float defnpmbmax = 0., defnpmbprcmax = 0., defnpmbsum = 0;  /// for non % mb
+	int defnpmbact = 0, defnpmbcnt = 0;*/
+
+	if (n == 0)
+	{
+		*SPnum = spnum;
+		*MBnum = mbnum;
+		return;
+	}
+	//nc = 1; // to save 1st coil data
+	int caddrb, caddre, cnum;
+	for (int j = 0; j < nc - 0; j++)
+	{
+		/*defaspmax = 0.; defaspprcmax = 0.;
+		defpspmax = 0.; defpspprcmax = 0.;
+		defpmbmax = 0.; defpmbprcmax = 0.;
+		defnpmbmax = 0.; defnpmbprcmax = 0.;
+		defaspact = defpspact = defpmbact = defnpmbact = 0;*/
+		if (j == 5)
+			j = j;
+
+		defspmbmax = 0.; defspmbprcmax = 0.;
+		defspmbact = defspmbact = 0;
+
+		caddrb = *(pPaddr + j + 0);
+		if (j + 1 < nc)
+			caddre = *(pPaddr + j + 1) - 1;
+		else
+			caddre = n - 1;
+		cnum = (caddre - caddrb);
+
+		int bw = min(sz1, cnum / 2);
+
+		/*
+		caddrb = *(pPaddr + j + 0);
+		if (j + 1 < nc)
+			caddre = *(pPaddr + j + 1) - 1;
+		else
+			caddre = n - 1;
+		cnum = (caddre - caddrb);*/
+
+		//medo = (float *)malloc(n * sizeof(float));
+		//Srunmed(pw, medo, n, bw, 0); // Running median
+		//Srunmed(pw, medo, n, bw, 1);
+		//SrunmedS(pw, medo, n, bw, 0, 4); // Running median with skip
+		//SrunmedSLI(pw, medo, n, bw, 1, skip); // Running median with skip and linear interp.
+		//float *buf=(float *)malloc((n+2*bw)*sizeof(float));
+		//SrunmedSLIExt(pw,  medo+MEDOSIZE/2, medo, n, bw, 0, skip); // Running median with Extension at the ends, skip and linear interp.
+		//////////////////////
+		//SrunmedSLIExtNoS(pw + caddrb, medo + MEDOSIZE / 2, medo, n, bw, skip, 0); // Running median with Extension at the ends, skip and linear interp (with skip at ends).
+
+		SrunmedSLI(pw + caddrb + 0, medo, cnum - 0, bw, 0, skip);
+		defin = 0;
+		//SrunmedSLI(pw + caddrb + 0, medo + MEDOSIZE * j / 2, cnum - 0, bw, 0, skip); /// saving both profiles for testing
+		int cnt = 0;
+		//for (j = caddrb + bw / 2; j < caddre - bw / 2; j++)
+		//for (int jj = bw / 2; jj < cnum - bw / 2; jj++)
+		int *pDef = (int *)malloc(cnum * sizeof(int));
+		for (int jj = 0; jj < cnum - 1; jj++) /// cycle 1
+		{
+			w = *(pw + caddrb + jj);
+			wg = (float)*(pwg + caddrb + jj);
+			if (j == 5 && jj == 2901)
+				j = j;
+			//wn = (float)*(medo + MEDOSIZE * j / 2 + jj);
+			wn = (float)*(medo + jj);
+			dg = w - wg;
+			dn = w - wn;
+			dgprc = (float)(dg * 100. / wg);
+			dnprc = (float)(dn * 100. / (wn + 0.001));
+			tdef = FWM_NONE2;
+			if (dnprc <= -mprc)
+			{
+				def = -dn;
+				defprc = dnprc;
+				tdef = FWM_MB_PRC2;
+			}
+			if (dn <= -mabs)
+			{
+				def = dn;  /// special value for Short
+				defprc = dnprc;
+				deftype = FWM_MB_ABS2;
+				tdef = tdef | deftype;
+			}
+			if (w < narpwidth) // too narrow pattern detected in FWM processing
+			{
+				def = w;  /// width
+				defprc = -100.;
+				deftype = FWM_NARROW2;
+				tdef = tdef | deftype;
+			}
+			if (wn < 0.01) // open detected in FWM processing
+			{
+				def = -5.0505;  /// special value for Short
+				defprc = -100.;
+				deftype = FWM_OPEN2;
+				tdef = tdef | deftype;
+			}
+			//////////////////////////////////////////////////
+			if (dnprc >= sprc)
+			{
+				def = dn;
+				defprc = dnprc;
+				deftype = FWM_SP_PRC2;
+				tdef = tdef | deftype;
+			}
+			if (dn >= pabs)
+			{
+				def = dn;
+				defprc = dnprc;
+				deftype = FWM_SP_ABS2;
+				tdef = tdef | deftype;
+			}
+			if (w > widepwidth) // too narrow pattern detected in FWM processing
+			{
+				def = w;  /// width
+				defprc = -100.;
+				deftype = FWM_WIDE2;
+				tdef = tdef | deftype;
+			}
+
+			*(pDef + jj) = tdef;
+		}
+		/////////////////////////////////////
+		int prdef = *(pDef + 0);
+		for (int jj = 1; jj < cnum - 1; jj++) /// cycle 2
+		{
+			def = *(pDef + jj);
+			//if(def== FWM_NONE2)
+			if (def > 0 && def < 16) // MB
+			{
+					deftype = def;
+					*(pDefMB + mbnum) = def;
+					*(pDefMBprc + mbnum) = defprc;
+					defx = *(pXC + caddrb + jj - 0);
+					defy = *(pYC + caddrb + jj - 0);
+					*(pXdefMB + mbnum) = defx;
+					*(pYdefMB + mbnum) = defy;
+					mbnum++;
+			}
+			else if (def >= 16) // SP
+			{
+					deftype = def;
+					*(pDefSP + spnum) = def;
+					*(pDefSPprc + spnum) = defprc;
+					defx = *(pXC + caddrb + jj - 0);
+					defy = *(pYC + caddrb + jj - 0);
+					*(pXdefSP + spnum) = defx;
+					*(pYdefSP + spnum) = defy;
+					spnum++;
+			}
+			
+		}
+
+		free(pDef);
+
+
+	}
+	*SPnum = spnum;
+	*MBnum = mbnum;
+	//free(medo);
+	//free(buf);
+}
 
 void CFWM::FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, float *pYC, int nc, int n, int *pPaddr, int sz1, int skip,
 	float mprc, float sprc, float mabs, float minthp, float narpwidth, float widepwidth, float stdgpwidth, float pabs, int dlen,
@@ -4294,6 +4517,8 @@ void CFWM::FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, flo
 		defpmbmax = 0.; defpmbprcmax = 0.;
 		defnpmbmax = 0.; defnpmbprcmax = 0.;
 		defaspact = defpspact = defpmbact = defnpmbact = 0;*/
+		if (j == 5)
+			j = j;
 
 		defspmbmax = 0.; defspmbprcmax = 0.;
 		defspmbact = defspmbact = 0;
@@ -4336,7 +4561,7 @@ void CFWM::FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, flo
 		{
 			w = *(pw + caddrb + jj);
 			wg = (float)*(pwg + caddrb + jj);
-			if (j == 41 && jj == 362)
+			if (j == 5 && jj == 2901)
 				j = j;
 			//wn = (float)*(medo + MEDOSIZE * j / 2 + jj);
 			wn = (float)*(medo + jj);
@@ -4349,7 +4574,7 @@ void CFWM::FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, flo
 			{
 				def = -dn;
 				defprc = dnprc;
-				deftype = FWM_MB_PRC2;
+				tdef = FWM_MB_PRC2;
 			}
 			if (dn <= -mabs)
 			{

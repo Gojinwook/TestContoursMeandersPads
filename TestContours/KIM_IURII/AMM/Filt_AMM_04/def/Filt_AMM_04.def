@@ -1,0 +1,132 @@
+/*****************************************************************************
+ * threshold.def
+ *****************************************************************************
+ *
+ * Project:      HALCON Extension Package Interface
+ * Description:  Operator database for the user-defined extensions of HALCON
+ * Dependencies: CIPUserThreshold.c, TestThreshold.c
+ *
+ * (c) 1996-2018 by MVTec Software GmbH
+ *               www.mvtec.com
+ *
+ *****************************************************************************
+ */ 
+ 
+/******************************   user_thresh  *******************************
+ *
+ * Note, that this is a quite short definition of the user_thresh operator.
+ * However, using this definition the user-defined operator user_thresh() 
+ * can be used from C, C++ and hdevelop.
+ *
+ */
+
+user_Filt_AMM_04 <- CIPUserFilt_AMM_04[::hv_Input$F, hv_Win_Len$f, hv_Move_Avg$f, hv_thrMB$f, hv_thrSP$f:hv_Tuple_Avg_CMax,hv_Tuple_Avg_CMin,hv_Tuple_Avg_MM_Th]
+ 
+short.english
+  Medial filter;
+abstract.english
+  A more extended description can be placed in the abstract slot. It
+  is also possible to refer to a more general description of the chapter
+  \ChapRef{UserExtension}.
+  ;
+
+module
+  foundation;
+
+chapter.english
+  UserExtensions;
+
+functionality
+  object;
+
+parallelization
+  process_exclusively:   false;
+  process_locally:       false;
+  process_mutual:        false;
+  method:                none;
+  domain_split:          0;
+  region_postprocessing: domain_concat_si_inp;
+
+parameter
+  hv_Input:           input_control;
+  default_type:       real;
+  multivalue:         optional;
+  sem_type:           real;
+  type_list:          real;
+
+parameter
+  hv_Win_Len:         input_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+
+parameter
+  hv_Move_Avg:         input_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+
+parameter
+  hv_thrMB:         input_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+
+parameter
+  hv_thrSP:         input_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+
+parameter
+  hv_Tuple_Avg_CMax:  output_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+parameter
+  hv_Tuple_Avg_CMin:  output_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+parameter
+  hv_Tuple_Avg_MM_Th:  output_control;
+  default_type:       real;
+  multivalue:         false;
+  sem_type:           real;
+  type_list:          real;
+/*****************************************************************************
+ * The available chapters are defined by all values that occur under an 
+ * english chapter slot for any operator (here: UserExtensions). These IDs
+ * must be used in the chapter_ref statement for documenting a chapter
+ * as well as in the \ChapRef element for linking to a chapter. 
+ *****************************************************************************
+ */ 
+chapter_ref UserExtensions <- user_chapter
+
+abstract.english
+  General documentation of chapter UserExtensions.
+  ;
+
+
+class Filt_AMM_04 <- user
+
+short.english
+  Sample extension package.;
+
+iid
+  {bf6a1001-1b96-11d4-b295-00e0293dc2ac};
+
+clsid
+  {bf6a1002-1b96-11d4-b295-00e0293dc2ac};
+
+
+library Filt_AMM_04 <- user_library
+
+libid
+  {bf6a1000-1b96-11d4-b295-00e0293dc2ac};

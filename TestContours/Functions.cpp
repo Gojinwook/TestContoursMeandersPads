@@ -1703,7 +1703,7 @@ namespace Functions
 		PaintRegion(ho_RegionPH, *m_local_ImModified, &(*m_local_ImModified), hv_thr + 1, "fill");
 
 		//FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 8000);
-		FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 800);
+		FillUpShape(ho_RegionDifference3, &(*ho_RegionISnoPhnoIsl), "area", 1, 80);
 		Difference(ho_DomainIm, (*ho_RegionISnoPhnoIsl), &(*ho_RegionInoPhnoIsl));
 		Difference((*ho_RegionISnoPhnoIsl), ho_RegionDifference3, &ho_RegionIsl);
 
@@ -1741,12 +1741,13 @@ namespace Functions
 		HObject  ho_SkeletonsFWMd, ho_RegionInoDS, ho_RecInoD;
 		HObject  ho_RegionsFWM, ho_RegionsFWMBi, ho_RegionsFWMB;
 		HObject  ho_Obj, ho_Skel, ho_Objs, ho_RegFWMB, ho_obj1, ho_objfu;
-		HObject  ho_RegionIntersection;
+		HObject  ho_RegionIntersection, ho_RegionFWM, ho_RegionFWMB;
 
 		// Local control variables
 		HTuple  hv_no, hv_Row1, hv_Column1, hv_Row2, hv_Column2;
 		HTuple  hv_j, hv_nO, hv_jj, hv_a, hv_Row, hv_Column, hv_stseq;
-		HTuple  hv_overf, hv_SequenceINBi;
+		HTuple  hv_overf, hv_SequenceINBi, hv_Rows, hv_Columns;
+		HTuple  hv_n, hv_T1, hv_gv, hv_TV;
 
 		//**** BuildIRBP8
 		//**- 13.11.2025 - changed a lot
@@ -1805,13 +1806,100 @@ namespace Functions
 		hv_stseq = hv_nEmpty + 1;
 		hv_overf = 255 - hv_stseq;
 		TupleGenSequence(hv_stseq, ((*hv_nFWMP) + hv_stseq) - 1, 1, &hv_SequenceINBi);
-		//WriteObject(ho_RegionsFWMB, "C:\\TestContSaved\\ho_RegionsFWMB");
-		
-		PaintRegion(ho_RegionsFWM, (*ho_ImIRBPOut), &(*ho_ImIRBPOut), 1, "fill");
-		//WriteObject(ho_RegionsFWMBi, "C:\\TestContSaved\\ho_RegionsFWMBi");
-		PaintRegion(ho_RegionsFWMB, (*ho_ImIRBPOut), &(*ho_ImIRBPOut), hv_SequenceINBi,
-			"fill");
+		Union1(ho_RegionsFWM, &ho_RegionFWM);
+		GetRegionPoints(ho_RegionFWM, &hv_Rows, &hv_Columns);
+		TupleLength(hv_Rows, &hv_n);
+		TupleGenConst(hv_n, 1, &hv_T1);
+		SetGrayval((*ho_ImIRBPOut), hv_Rows, hv_Columns, hv_T1);
+		//paint_region (RegionFWM, ImIRBPOut, ImIRBPOut, 1, 'fill')
+		{
+			HTuple end_val52 = (*hv_nFWMP);
+			HTuple step_val52 = 1;
+			for (hv_j = 1; hv_j.Continue(end_val52, step_val52); hv_j += step_val52)
+			{
+				SelectObj(ho_RegionsFWMB, &ho_RegionFWMB, hv_j);
+				GetRegionPoints(ho_RegionFWMB, &hv_Rows, &hv_Columns);
+				hv_gv = HTuple(hv_SequenceINBi[hv_j - 1]);
+				TupleLength(hv_Rows, &hv_n);
+				TupleGenConst(hv_n, hv_gv, &hv_TV);
+
+				SetGrayval((*ho_ImIRBPOut), hv_Rows, hv_Columns, hv_TV);
+			}
+		}
+		//paint_region (RegionsFWMB, ImIRBPOut, ImIRBPOut, SequenceINBi, 'fill')
+
+
 		return;
 	}
+
+	void BuildIRBP9(HObject ho_SkeletonsFWM, HObject ho_RegionInoD, HObject ho_ImIRBP,
+		HObject ho_RegionsPNi, HObject ho_RegCut, HObject *ho_ImIRBPOut, HTuple hv_expsize,
+		HTuple hv_nEmpty, HTuple hv_dil, HTuple *hv_nFWMP)
+	{
+
+		// Local iconic variables
+		HObject  ho_RegionInoDS, ho_RecInoD, ho_SkeletonsFWMd;
+		HObject  ho_SkeletonsFWMdi, ho_RegionsFWM, ho_RegionsFWMB;
+		HObject  ho_RegionFWM, ho_RegionFWMB;
+
+		// Local control variables
+		HTuple  hv_Row1, hv_Column1, hv_Row2, hv_Column2;
+		HTuple  hv_stseq, hv_overf, hv_SequenceINBi, hv_Rows, hv_Columns;
+		HTuple  hv_n, hv_T1, hv_j, hv_gv, hv_TV;
+
+		//**** BuildIRBP9
+		//**- 13.11.2025 - changed a lot
+		(*ho_ImIRBPOut) = ho_ImIRBP;
+		//* dif. is used to exclude points of SkeletonsFWMS from RegionsFWMS if necessary
+		//dilation_circle (SkeletonsFWM, SkeletonsFWMSd, 2.5)
+		//1+2
+		hv_dil = 9;
+
+
+		//1
+		//difference (SkeletonsFWMSd, RegionInoDS, SkeletonsFWMSm)
+		//3
+		SmallestRectangle1(ho_RegionInoD, &hv_Row1, &hv_Column1, &hv_Row2, &hv_Column2);
+		GenRectangle1(&ho_RecInoD, hv_Row1 - 5, hv_Column1 - 5, hv_Row2 + 5, hv_Column2 + 5);
+		//difference (RecInoD, RegionInoDfwm, RegionInoDSfwm)
+		Difference(ho_RecInoD, ho_RegionInoD, &ho_RegionInoDS);
+
+		DilationCircle(ho_SkeletonsFWM, &ho_SkeletonsFWMd, 2);
+
+		Intersection(ho_SkeletonsFWMd, ho_RegionInoD, &ho_SkeletonsFWMdi);
+		ExpandRegion(ho_SkeletonsFWMdi, ho_RegionInoDS, &ho_RegionsFWM, hv_dil, "image");
+		Boundary(ho_RegionsFWM, &ho_RegionsFWMB, "inner");
+		CountObj(ho_SkeletonsFWM, &(*hv_nFWMP));
+
+		hv_stseq = hv_nEmpty + 1;
+		hv_overf = 255 - hv_stseq;
+		TupleGenSequence(hv_stseq, ((*hv_nFWMP) + hv_stseq) - 1, 1, &hv_SequenceINBi);
+		Union1(ho_RegionsFWM, &ho_RegionFWM);
+		GetRegionPoints(ho_RegionFWM, &hv_Rows, &hv_Columns);
+		TupleLength(hv_Rows, &hv_n);
+		TupleGenConst(hv_n, 1, &hv_T1);
+		SetGrayval((*ho_ImIRBPOut), hv_Rows, hv_Columns, hv_T1);
+		//paint_region (RegionFWM, ImIRBPOut, ImIRBPOut, 1, 'fill')
+
+		{
+			HTuple end_val34 = (*hv_nFWMP);
+			HTuple step_val34 = 1;
+			for (hv_j = 1; hv_j.Continue(end_val34, step_val34); hv_j += step_val34)
+			{
+				SelectObj(ho_RegionsFWMB, &ho_RegionFWMB, hv_j);
+				GetRegionPoints(ho_RegionFWMB, &hv_Rows, &hv_Columns);
+				hv_gv = HTuple(hv_SequenceINBi[hv_j - 1]);
+				TupleLength(hv_Rows, &hv_n);
+				TupleGenConst(hv_n, hv_gv, &hv_TV);
+
+				SetGrayval((*ho_ImIRBPOut), hv_Rows, hv_Columns, hv_TV);
+			}
+		}
+		//paint_region (RegionsFWMB, ImIRBPOut, ImIRBPOut, SequenceINBi, 'fill')
+
+
+		return;
+	}
+
 
 } // namespace
