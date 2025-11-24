@@ -4171,8 +4171,8 @@ void CTestContoursDlg::OnBnClickedButton23() // Start FWMS
 	hWindow.DispRegion(m_ho_RegionsSPS);
 	//int MBnum = hv_nMB.I();
 	//int SPnum = hv_nSP.I();
-	hWindow.DispText((MBSnum), "window", 10, 10, "cyan", "box", "true");
-	hWindow.DispText((SPSnum), "window", 30, 10, "magenta", "box", "true");
+	hWindow.DispText((MBSnum), "window", 10, 10, "blue", "box", "true");
+	hWindow.DispText((SPSnum), "window", 30, 10, "red", "box", "true");
 
 	//DispRegion(m_ho_RegionsSP);
 

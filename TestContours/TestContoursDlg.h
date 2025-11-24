@@ -125,11 +125,11 @@ public:
 	float prcMBS = 50.; 		// MB % // % nearby for MB (Space)
 	float absMBS = 3.;		//  absolute Space MB value (Space)(in pixels)
 	float minMBS = 4.5;		//  minimal Space MB value (in pixels)
-	float prcSPS = 40.; 		// % nearby  for spur (Space)
-	float absSPS = 1.5;		//  absolute Space spur value (in pixels)
+	float prcSPS = 100.; 		// % nearby  for spur (Space)
+	float absSPS = 2.5;		//  absolute Space spur value (in pixels)
 	float minSPS = 10;		//  minimal Space spur value (in pixels)
 	float narrowwS = 0.7;	//  Space width to detect as narrow
-	float widewS = 10.;	//  Space width to detect as too wide
+	float widewS = 20.;	//  Space width to detect as too wide
 
 	float minwS = 4.;		//  minimal pattern width to use %
 	int sz2 = 15;			// Running median sizes for FWMS 
@@ -197,4 +197,5 @@ public:
 	afx_msg void OnEnChangeEdit46();
 	afx_msg void OnEnChangeEdit47();
 	afx_msg void OnEnChangeEdit48();
+	afx_msg void OnBnClickedButton24();
 };

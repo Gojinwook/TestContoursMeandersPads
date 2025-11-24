@@ -1111,6 +1111,9 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 			shift = 0.0;
 			jSPup = 1;
 			jSPdn = 0;
+			PIntY[0] = PIntY[1] = iyc;
+			PIntX[0] = PIntX[1] = ixc;
+
 			//return ;
 		}
 		else if (intnum == 1)
@@ -1119,6 +1122,10 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 			{
 				wmax = pind;
 				wmin = wmax;
+				PIntY[0] = PIntY[1] = iyc;
+				PIntX[0] = PIntX[1] = ixc;
+				jSPup = 1;
+				jSPdn = 0;
 				//return()
 			}
 			else 
@@ -1285,6 +1292,10 @@ void CFWM::CPU_MSPtProc50(UINT8 *pIm, UINT16 *pImIRB, UINT16 *pImCLC, int imw, i
 			int2y = iyc;
 		}
 
+		if (abs(int1x) > 100000)
+			int1x = ixc;
+		if (abs(int1y) > 100000)
+			int1y = iyc;
 		
 		if(wmax>500)
 			wmax = wmax;
@@ -4444,7 +4455,8 @@ void CFWM::FWM_PostProcCPUNew21(float *pw, int *pwg, float *medo, float *pXC, fl
 					*(pYdefSP + spnum) = defy;
 					spnum++;
 			}
-			
+			//if (abs(defx) > 100000)
+			//	defx = defx;
 		}
 
 		free(pDef);
