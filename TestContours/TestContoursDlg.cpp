@@ -3496,7 +3496,7 @@ void CTestContoursDlg::OnBnClickedButton21() // Start FWM
 	GenEmptyObj(&m_ho_RegionCut);
 	HTuple hv_expsize = 351;
 	HTuple hv_dil = 3;
-	HTuple hv_nEmpty = 0;
+	HTuple hv_nEmpty = 1;
 	HTuple hv_nFWMP;
 	BuildIRBP9(m_ho_SkeletonsFWM, m_ho_RegionInoIslnoPh, m_ho_ImIRBP, m_ho_RegionsPNPi, m_ho_RegionCut,
 		&m_ho_ImIRBP,
@@ -3971,7 +3971,7 @@ void CTestContoursDlg::OnBnClickedButton23() // Start FWMS
 	GenEmptyObj(&m_ho_RegionCut);
 	HTuple hv_expsize = 351;
 	HTuple hv_dil = 9;
-	HTuple hv_nEmpty = 0;
+	HTuple hv_nEmpty = 1;
 	HTuple hv_nFWMS;
 	if (save == 1)
 	{
@@ -4286,7 +4286,7 @@ void CTestContoursDlg::OnBnClickedButton24() //  FWM + FWMS
 	GenEmptyObj(&m_ho_RegionCut);
 	HTuple hv_expsize = 351;
 	HTuple hv_dil = 3;
-	HTuple hv_nEmpty = 0;
+	HTuple hv_nEmpty = 1;
 	HTuple hv_nFWMP;
 	BuildIRBP9(m_ho_SkeletonsFWM, m_ho_RegionInoIslnoPh, m_ho_ImIRBP, m_ho_RegionsPNPi, m_ho_RegionCut,
 		&m_ho_ImIRBP,
