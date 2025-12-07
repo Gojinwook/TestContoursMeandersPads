@@ -53,7 +53,7 @@ using namespace std;
 
 #define ND 1024 // Max. number of MB and SP per skeleton part
 #define MAX_FWM_DEFECT			10000
-#define MEDOSIZE			    280000
+#define MEDOSIZE			    1000000
 
 class CFWM
 {
@@ -71,7 +71,7 @@ public:
 	HObject /*ho_ImCLC, */ho_ImIRBP, ho_ImIRBS, ho_RegionInoD;
 	UINT16 *pImIRBP, *pImIRBS, *pImCLC, *pImCLCS;// image pointers
 
-	float *pWidth = NULL, *pWmin = NULL, *pmedo = NULL, *pmedoe;
+	float *pWidth = NULL, *pWmin = NULL, *pmedo = NULL;// , *pmedoe;
 	float *pPInt1x = NULL, *pPInt1y = NULL, *pPInt2x = NULL, *pPInt2y = NULL, *pPInt3x, *pPInt3y, *pPInt4x, *pPInt4y;	// intersection points arrays
 	float *pShift = NULL;
 

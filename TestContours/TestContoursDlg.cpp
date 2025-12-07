@@ -2061,6 +2061,7 @@ void CTestContoursDlg::OnBnClickedButton7()  // Building real contour + finding 
 
 void CTestContoursDlg::OnBnClickedButton5()
 {
+	m_hv_pathModel = "D:\\FC-BGA\\a03-a87-a0-aoi_LayerL1-0200\\a03-a87-a0-aoi-l4p\\Model\\Teach\\";
 	//OnBnClickedButton1();
 	ReadObject(&m_ho_CI, "C:\\Temp1\\CI.hobj");
 	ReadObject(&m_ho_CG, "C:\\Temp1\\CG.hobj");
@@ -2095,8 +2096,10 @@ void CTestContoursDlg::OnBnClickedButton5()
 	SetDlgItemText(IDC_EDIT9, cstr);
 	printf("\n***ContoursGrsmPc.hobj and RectanglesPadsCon.hobj read***");
 
-	ReadObject(&m_ho_ContoursWireAngles, "C:\\Temp1\\ContoursWireAngles.hobj");
-	ReadObject(&m_ho_RectanglesWireAngles, "C:\\Temp1\\RectanglesWireAngles.hobj");
+	ReadObject(&m_ho_ContoursWireAngles, m_hv_pathModel + "ContoursWireAngles");
+	ReadObject(&m_ho_RectanglesWireAngles, m_hv_pathModel + "RegionsWireAngles");
+	/*ReadObject(&m_ho_ContoursWireAngles, "C:\\Temp1\\ContoursWireAngles.hobj");
+	ReadObject(&m_ho_RectanglesWireAngles, "C:\\Temp1\\RegionsWireAngles.hobj");*/
 	CountObj(m_ho_RectanglesWireAngles, &tnum);
 	cstr.Format(_T("(%d)"), (int)tnum);
 	SetDlgItemText(IDC_EDIT12, cstr);
@@ -3691,10 +3694,12 @@ void CTestContoursDlg::OnBnClickedButton21() // Start FWM
 	hWindow.DispRegion(m_ho_RegionsMB);
 	hWindow.SetColor("red");
 	hWindow.DispRegion(m_ho_RegionsSP);
-	//int MBnum = hv_nMB.I();
-	//int SPnum = hv_nSP.I();
-	hWindow.DispText((MBnum), "window", 10, 10, "blue", "box", "true");
-	hWindow.DispText((SPnum), "window", 30, 10, "red", "box", "true");
+	/*MBnum = hv_nMB.I();
+	SPnum = hv_nSP.I();*/
+	//CountObj(m_ho_RegionsSP, &hv_nSP);
+	//CountObj(m_ho_RegionsMB, &hv_nMB);
+	hWindow.DispText((hv_nSP.I()), "window", 10, 10, "blue", "box", "true");
+	hWindow.DispText((hv_nMB.I()), "window", 30, 10, "red", "box", "true");
 
 		//DispRegion(m_ho_RegionsSP);
 	
@@ -3702,6 +3707,7 @@ void CTestContoursDlg::OnBnClickedButton21() // Start FWM
 	if (save == 1)
 	{
 		WriteObject(m_ho_RegionsMB, "C:\\TestContSaved\\m_ho_RegionsMB");
+		//ReadObject(&m_ho_RegionsMB, "C:\\TestContSaved\\m_ho_RegionsMB");
 		WriteObject(m_ho_RegionsSP, "C:\\TestContSaved\\m_ho_RegionsSP");
 		
 		WriteTuple(PWidthP_tuple, "C:\\TestContSaved\\PWidthP_tuple.tup");
@@ -3748,7 +3754,7 @@ void CTestContoursDlg::OnBnClickedButton22()
 	m_hv_pathModel = "D:\\FC-BGA\\a03-a87-a0-aoi_LayerL1-0200\\a03-a87-a0-aoi-l4p\\Model\\Teach\\";
 	HObject ho_Domain;
 	HTuple pathModel=m_hv_pathModel, pathModelTuple;
-	ReadImage(&m_ho_Im, pathModel+"ImaSP.tif");
+	ReadImage(&m_ho_Im, pathModel+"Ima.tif");
 	ReadImage(&m_ho_Gi, pathModel + "Gi.tif");
 	ReadImage(&m_ho_ImCLC, pathModel + "ImCLC.tif");
 	
@@ -3855,7 +3861,7 @@ void CTestContoursDlg::OnEnChangeEdit31()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT31, cstr);
-	m_hv_threshold =(int) _tstof(cstr);
+	m_hv_threshold =_tstoi(cstr);
 }
 
 
@@ -3863,7 +3869,7 @@ void CTestContoursDlg::OnEnChangeEdit32()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT32, cstr);
-	fwmw = (int)_tstof(cstr);
+	fwmw = _tstoi(cstr);
 }
 
 
@@ -3879,7 +3885,7 @@ void CTestContoursDlg::OnEnChangeEdit33()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT33, cstr);
-	prcMB = (int)_tstof(cstr);
+	prcMB = _tstof(cstr);
 }
 
 
@@ -3887,7 +3893,7 @@ void CTestContoursDlg::OnEnChangeEdit35()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT35, cstr);
-	absMB = (int)_tstof(cstr);
+	absMB = _tstof(cstr);
 	
 }
 
@@ -3896,7 +3902,7 @@ void CTestContoursDlg::OnEnChangeEdit36()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT36, cstr);
-	absSP = (int)_tstof(cstr);
+	absSP = _tstof(cstr);
 }
 
 
@@ -3904,7 +3910,7 @@ void CTestContoursDlg::OnEnChangeEdit37()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT37, cstr);
-	narrowwp = (int)_tstof(cstr);
+	narrowwp = _tstof(cstr);
 }
 
 
@@ -3912,7 +3918,7 @@ void CTestContoursDlg::OnEnChangeEdit38()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT38, cstr);
-	widewp = (int)_tstof(cstr);
+	widewp = _tstof(cstr);
 }
 
 
@@ -3920,7 +3926,7 @@ void CTestContoursDlg::OnEnChangeEdit39()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT39, cstr);
-	sz1 = (int)_tstof(cstr);
+	sz1 = _tstoi(cstr);
 }
 
 
@@ -3938,7 +3944,7 @@ void CTestContoursDlg::OnEnChangeEdit40()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT40, cstr);
-	m_hv_thresholdS = (int)_tstof(cstr);
+	m_hv_thresholdS = _tstoi(cstr);
 }
 
 
@@ -4204,7 +4210,7 @@ void CTestContoursDlg::OnEnChangeEdit41()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT41, cstr);
-	fwmwS = (int)_tstof(cstr);
+	fwmwS = _tstoi(cstr);
 }
 
 
@@ -4212,7 +4218,7 @@ void CTestContoursDlg::OnEnChangeEdit42()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT42, cstr);
-	prcMBS = (int)_tstof(cstr);
+	prcMBS = _tstof(cstr);
 }
 
 
@@ -4220,7 +4226,7 @@ void CTestContoursDlg::OnEnChangeEdit43()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT43, cstr);
-	prcSPS = (int)_tstof(cstr);
+	prcSPS = _tstof(cstr);
 }
 
 
@@ -4228,7 +4234,7 @@ void CTestContoursDlg::OnEnChangeEdit44()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT44, cstr);
-	absMBS = (int)_tstof(cstr);
+	absMBS = _tstof(cstr);
 }
 
 
@@ -4236,7 +4242,7 @@ void CTestContoursDlg::OnEnChangeEdit45()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT45, cstr);
-	absSPS = (int)_tstof(cstr);
+	absSPS = _tstof(cstr);
 }
 
 
@@ -4244,7 +4250,7 @@ void CTestContoursDlg::OnEnChangeEdit46()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT46, cstr);
-	narrowwS = (int)_tstof(cstr);
+	narrowwS = _tstof(cstr);
 }
 
 
@@ -4252,7 +4258,7 @@ void CTestContoursDlg::OnEnChangeEdit47()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT47, cstr);
-	widewS = (int)_tstof(cstr);
+	widewS = _tstof(cstr);
 }
 
 
@@ -4260,7 +4266,7 @@ void CTestContoursDlg::OnEnChangeEdit48()
 {
 	CString cstr;
 	GetDlgItemText(IDC_EDIT48, cstr);
-	sz2 = (int)_tstof(cstr);
+	sz2 = _tstoi(cstr);
 }
 
 

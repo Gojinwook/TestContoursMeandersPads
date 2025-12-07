@@ -89,13 +89,13 @@ public:
 	int fwmw; // wire to save
 	int lMB = 1;			// MB length
 	float prcMB = 50.; 		// MB % // % nearby for MB (Pattern)
-	float absMB = 3.;		//  absolute MB value (Pattern)(in pixels)
+	float absMB = 3.5;		//  absolute MB value (Pattern)(in pixels)
 	float minMB = 4.5;		//  minimal MB value (in pixels)
-	float prcSP = 40.; 		// % nearby  for spur (Pattern)
+	float prcSP = 50.; 		// % nearby  for spur (Pattern)
 	float absSP = 1.5;		//  absolute spur value (in pixels)
 	float minSP = 10;		//  minimal spur value (in pixels)
-	float narrowwp = 0.7;	//  pattern width to detect as narrow
-	float widewp = 10.;	//  pattern width to detect as too wide
+	float narrowwp = 0.3;	//  pattern width to detect as narrow
+	float widewp = 30.;	//  pattern width to detect as too wide
 
 	float minwp = 4.;		//  minimal pattern width to use %
 	int sz1 = 15;			// Running median sizes for FWM 

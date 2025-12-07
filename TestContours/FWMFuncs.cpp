@@ -79,6 +79,8 @@ void CFWM::Alloc2(int np, int nps)
 	/// Pattern
 	pWidth = (float *)malloc(np * 1 * sizeof(float));
 	pWmin = (float *)malloc(np * 1 * sizeof(float));
+	for (int i = 0; i < np; ++i) pWidth[i] = pWmin[i] = 0.;
+
 	pPInt1x = (float *)malloc(np * 2 * sizeof(UINT64));
 	pPInt1y = (float *)malloc(np * 2 * sizeof(UINT64));
 
@@ -86,6 +88,7 @@ void CFWM::Alloc2(int np, int nps)
 	pPInt2y = (float *)malloc(np * 2 * sizeof(UINT64));
 	pShift = (float *)malloc(np * 1 * sizeof(UINT64));
 	pPuseint = (int *)malloc(np * 1 * sizeof(UINT64));
+	for (int i = 0; i < np; ++i) pPInt1x[i] = pPInt1y[i] = pPInt2x[i] = pPInt1x[i] = pShift[i] = pPuseint[i] = 0;
 
 	/// Space
 	pWidthS = (float *)malloc(nps * 1 * sizeof(float));
@@ -101,6 +104,8 @@ void CFWM::Alloc2(int np, int nps)
 	pmedoS = (float *)malloc(MEDOSIZE * 1 * sizeof(float));
 
 	pmedo = (float *)malloc(MEDOSIZE * 1 * sizeof(float));
+
+	for (int i = 0; i < MEDOSIZE; ++i) pmedoS[i] = pmedo[i] = 0;
 
 }
 
@@ -4361,13 +4366,15 @@ void CFWM::FWM_PostProcCPUNew21(float *pw, int *pwg, float *medo, float *pXC, fl
 		int cnt = 0;
 		//for (j = caddrb + bw / 2; j < caddre - bw / 2; j++)
 		//for (int jj = bw / 2; jj < cnum - bw / 2; jj++)
+		//int *pDef = (int *)malloc(cnum * sizeof(int));
 		int *pDef = (int *)malloc(cnum * sizeof(int));
-		for (int jj = 0; jj < cnum - 1; jj++) /// cycle 1
+		//for (int i = 0; i < cnum; ++i) pDef[i] = 0.;
+		for (int jj = 0; jj < cnum - 0; jj++) /// cycle 1 (-2)
 		{
 			w = *(pw + caddrb + jj);
 			wg = (float)*(pwg + caddrb + jj);
-			if (j == 5 && jj == 2901)
-				j = j;
+			//if (j == 5 && jj == 2901)
+			//	j = j;
 			//wn = (float)*(medo + MEDOSIZE * j / 2 + jj);
 			wn = (float)*(medo + jj);
 			dg = w - wg;
@@ -4568,7 +4575,8 @@ void CFWM::FWM_PostProcCPUNew2(float *pw, int *pwg, float *medo, float *pXC, flo
 		int cnt = 0;
 		//for (j = caddrb + bw / 2; j < caddre - bw / 2; j++)
 		//for (int jj = bw / 2; jj < cnum - bw / 2; jj++)
-		int *pDef = (int *)malloc(cnum * sizeof(int));
+		int *pDef = (int *)malloc(2*cnum * sizeof(int));
+		for (int i = 0; i < 2*cnum; ++i) pDef[i] = 0.;
 		for (int jj = 0; jj < cnum - 1; jj++) /// cycle 1
 		{
 			w = *(pw + caddrb + jj);
